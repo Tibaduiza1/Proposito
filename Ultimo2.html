@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Vida con Propósito - Tu Tiempo Efectivo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      color: #1f2937;
+    }
+    
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Patrón para el tiempo atrapado: Zona de "Peligro/Desperdicio" */
+    .trapped-pattern {
+      background-color: #e5e7eb;
+      background-image: repeating-linear-gradient(
+        45deg,
+        #9ca3af,
+        #9ca3af 10px,
+        #d1d5db 10px,
+        #d1d5db 20px
+      );
+    }
+    
+    /* Animación suave para el cambio de números */
+    .animate-number {
+      transition: color 0.5s ease;
+    }
+
+    /* Input personalizado para que se vea limpio */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body class="flex justify-center p-4 py-8 md:py-12">
+
+  <div class="glass-panel rounded-3xl w-full max-w-3xl p-6 md:p-10 border border-white/60 relative overflow-hidden">
+    
+    <!-- Decoración de fondo sutil -->
+    <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-blue-400 rounded-full blur-3xl opacity-10 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-red-400 rounded-full blur-3xl opacity-10 pointer-events-none"></div>
+
+    <!-- Encabezado -->
+    <div class="text-center mb-8 relative z-10">
+      <h1 class="text-3xl md:text-4xl font-black text-gray-800 tracking-tight mb-2">
+        ⏳ Tu Inventario de Vida
+      </h1>
+      <p class="text-gray-500 text-lg">
+        La verdad matemática sobre el tiempo que te queda para vivir significativamente.
+      </p>
+    </div>
+
+    <!-- Panel de Control (Inputs) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 relative z-10">
+      <!-- Entrada Edad -->
+      <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 hover:border-blue-300 transition-all shadow-sm group">
+        <label for="currentAge" class="block text-blue-800 font-bold mb-1 text-sm uppercase tracking-wide">Tu Edad Actual</label>
+        <div class="flex items-baseline">
+          <input type="number" id="currentAge" value="30" min="0" max="79"
+            class="w-full text-4xl font-black bg-transparent border-b-2 border-blue-200 focus:border-blue-600 outline-none text-blue-900 py-1 transition-colors" placeholder="30">
+          <span class="text-lg text-blue-400 font-semibold ml-2">años</span>
+        </div>
+      </div>
+
+      <!-- Entrada Horas Atrapadas -->
+      <div class="bg-red-50 p-5 rounded-2xl border border-red-100 hover:border-red-300 transition-all shadow-sm group">
+        <label for="trappedHoursDaily" class="block text-red-800 font-bold mb-1 text-sm uppercase tracking-wide">Tiempo "Atrapado" Diario</label>
+        <div class="flex items-baseline">
+          <input type="number" id="trappedHoursDaily" value="2" min="0" max="12.5" step="0.5"
+            class="w-full text-4xl font-black bg-transparent border-b-2 border-red-200 focus:border-red-600 outline-none text-red-900 py-1 transition-colors" placeholder="2.0">
+          <span class="text-lg text-red-400 font-semibold ml-2">horas/día</span>
+        </div>
+        <p class="text-xs text-red-500 mt-2 font-medium opacity-80">Redes, TV, tráfico, procrastinación...</p>
+      </div>
+    </div>
+
+    <!-- EL DATO HÉROE (El golpe de realidad) -->
+    <div id="heroSection" class="text-center mb-10 py-8 bg-gradient-to-b from-white to-gray-50 rounded-3xl shadow-sm border border-gray-200 relative z-10">
+      <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Tu verdadero capital disponible</p>
+      
+      <div class="flex flex-col md:flex-row justify-center items-center md:items-baseline gap-2 md:gap-4">
+        <span id="bigNumber" class="text-8xl md:text-9xl font-black text-gray-800 tracking-tighter leading-none animate-number">0</span>
+        <div class="flex flex-col items-center md:items-start">
+          <span class="text-3xl md:text-4xl font-bold text-gray-700 leading-none">Años</span>
+          <span class="text-sm font-bold text-emerald-600 uppercase tracking-widest mt-1">Efectivos (Hasta 65)</span>
+        </div>
+      </div>
+
+      <div class="mt-6 inline-flex items-center bg-yellow-50 border border-yellow-100 px-4 py-2 rounded-full mx-auto max-w-md">
+        <span class="text-lg mr-2">ℹ️</span>
+        <p class="text-yellow-800 text-xs text-left leading-tight font-medium">
+          Cálculo basado en tu edad hasta el retiro promedio (65 años). Descontando automáticamente <strong>11.5 horas/día</strong> de mantenimiento biológico (sueño, comida, higiene) + tus horas atrapadas.
+        </p>
+      </div>
+    </div>
+
+    <!-- Barra Visual -->
+    <div class="mb-6 relative z-10">
+      <div class="flex justify-between text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider px-1">
+        <span>Nacimiento (0)</span>
+        <span>Esperanza de vida (80)</span>
+      </div>
+      
+      <!-- Contenedor de la barra -->
+      <div class="relative w-full h-14 bg-gray-100 rounded-xl overflow-hidden shadow-inner flex ring-1 ring-gray-200">
+        
+        <!-- 1. Pasado (Gris plano) -->
+        <div id="barPast" class="h-full bg-gray-400 flex items-center justify-center relative border-r border-white/30 transition-all duration-500">
+             <span class="text-white text-xs font-bold opacity-50 transform -rotate-90 md:rotate-0">VIVIDO</span>
+        </div>
+        
+        <!-- Contenedor Futuro ACTIVO (de la edad actual a 65) -->
+        <div id="activeFutureContainer" class="h-full flex relative transition-all duration-700 ease-out">
+           <!-- 2. Real (Verde vibrante) -->
+           <div id="barReal" class="h-full bg-gradient-to-r from-emerald-500 to-green-500 shadow-lg relative z-20 transition-all duration-700 ease-out flex items-center justify-center">
+                <!-- Brillo sutil -->
+                <div class="absolute inset-0 bg-white opacity-20" style="background-image: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);"></div>
+                <span class="text-white text-xs font-bold drop-shadow-md hidden md:block z-30">TÚ</span>
+           </div>
+           
+           <!-- 3. Desperdicio + Bio (Rayado) -->
+           <div id="barTrapped" class="h-full trapped-pattern relative z-10 border-l border-white/20 transition-all duration-700 ease-out flex items-center justify-center">
+                <span class="text-gray-500 text-xs font-bold opacity-60 hidden md:block bg-white/50 px-1 rounded">RUTINA</span>
+           </div>
+        </div>
+
+        <!-- 4. Legacy/Freedom Time (65 to 80) -->
+        <div id="barLegacy" class="h-full bg-indigo-300/50 flex items-center justify-center relative z-0 transition-all duration-500 border-l border-white/20">
+             <span id="legacyText" class="text-indigo-800 text-xs font-bold opacity-80 hidden md:block z-30">LEGADO (65+)</span>
+        </div>
+      </div>
+      
+      <!-- Leyenda Dinámica -->
+      <div class="flex flex-wrap justify-center gap-4 md:gap-8 mt-4 text-xs md:text-sm font-medium text-gray-600">
+        <div class="flex items-center"><div class="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>Ya vivido</div>
+        <div class="flex items-center"><div class="w-3 h-3 bg-emerald-500 rounded-full mr-2 shadow-sm ring-1 ring-emerald-200"></div>Tiempo Constructor</div>
+        <div class="flex items-center"><div class="w-3 h-3 trapped-pattern rounded-full mr-2 border border-gray-400"></div>Tiempo Atrapado</div>
+        <div class="flex items-center"><div class="w-3 h-3 bg-indigo-300/50 rounded-full mr-2 border border-indigo-500/30"></div>Tiempo de Legado (65+)</div>
+      </div>
+    </div>
+
+    <!-- Mensaje Contextual (El análisis emocional) -->
+    <div id="dynamicMessage" class="mt-8 p-6 rounded-2xl bg-indigo-50 border border-indigo-100 text-center relative z-10 transition-all duration-300">
+      <h3 class="text-lg font-bold text-indigo-900 mb-2 flex justify-center items-center">
+        <span class="mr-2">💡</span> Diagnóstico
+      </h3>
+      <p id="analysisText" class="text-indigo-800 text-base md:text-lg leading-relaxed">
+        Calculando tu impacto...
+      </p>
+    </div>
+
+  </div>
+
+  <script>
+    // --- CONSTANTES ---
+    const LIFE_EXPECTANCY = 80; // Límite visual de la barra de vida
+    const RETIREMENT_AGE = 65; // Nuevo límite para el cálculo de "Años Efectivos"
+    const BIOLOGICAL_MAINTENANCE = 11.5; // El "impuesto biológico" fijo
+    
+    // --- REFERENCIAS DOM ---
+    const ageInput = document.getElementById('currentAge');
+    const trappedInput = document.getElementById('trappedHoursDaily');
+    const bigNumberEl = document.getElementById('bigNumber');
+    const analysisTextEl = document.getElementById('analysisText');
+    const barPastEl = document.getElementById('barPast');
+    const activeFutureContainerEl = document.getElementById('activeFutureContainer'); // Nuevo contenedor para 0-65
+    const barRealEl = document.getElementById('barReal');
+    const barTrappedEl = document.getElementById('barTrapped');
+    const barLegacyEl = document.getElementById('barLegacy'); // Nuevo segmento para 65-80
+    const messageBoxEl = document.getElementById('dynamicMessage');
+    const legacyTextEl = document.getElementById('legacyText'); // Referencia al texto de Legado
+    
+    function calculate() {
+      // 1. Obtener y Limpiar Valores
+      let age = parseFloat(ageInput.value);
+      let trappedDaily = parseFloat(trappedInput.value);
+
+      // Valores por defecto seguros si el campo está vacío
+      if (isNaN(age)) age = 0;
+      if (isNaN(trappedDaily)) trappedDaily = 0;
+
+      // Límites duros para evitar romper la lógica visual
+      if (age > 79) age = 79;
+      if (age < 0) age = 0;
+      
+      // El máximo atrapado posible es 24 - 11.5 = 12.5
+      const maxTrapped = 24 - BIOLOGICAL_MAINTENANCE;
+      if (trappedDaily < 0) trappedDaily = 0;
+      if (trappedDaily > maxTrapped) trappedDaily = maxTrapped;
+
+      // 2. Lógica Matemática
+      
+      // Años restantes hasta el retiro (65 años)
+      const yearsUntilRetirement = Math.max(0, RETIREMENT_AGE - age);
+      
+      // Horas Efectivas = 24 - (Bio + Atrapado)
+      const effectiveHoursDaily = 24 - BIOLOGICAL_MAINTENANCE - trappedDaily;
+      
+      // Factor de Efectividad = Horas Útiles / 24
+      const effectivenessFactor = effectiveHoursDaily / 24;
+      
+      // Años Reales = Años Restantes HASTA 65 * Factor
+      const realEffectiveYears = yearsUntilRetirement * effectivenessFactor;
+      
+      // Pérdida por horas atrapadas (Solo hasta 65)
+      const trappedFactor = trappedDaily / 24;
+      const yearsLostToTrap = yearsUntilRetirement * trappedFactor;
+
+      // 3. Actualizar UI
+      updateVisuals(age, yearsUntilRetirement, realEffectiveYears, yearsLostToTrap, trappedDaily);
+    }
+
+    function updateVisuals(age, yearsUntilRetirement, effectiveYears, trappedYearsLost, dailyTrappedHours) {
+      // --- A. BARRA DE PROGRESO (Todo está basado en el 100% que es 80 años) ---
+      
+      // 1. Ancho del Pasado (Gris)
+      const pastPct = (age / LIFE_EXPECTANCY) * 100;
+      barPastEl.style.width = `${pastPct}%`;
+
+      // 2. Ancho del Futuro Activo (De la edad actual a 65)
+      let activeFutureDuration = Math.max(0, RETIREMENT_AGE - age);
+      let activeFuturePct = (activeFutureDuration / LIFE_EXPECTANCY) * 100;
+      activeFutureContainerEl.style.width = `${activeFuturePct}%`;
+      activeFutureContainerEl.style.display = activeFuturePct > 0 ? 'flex' : 'none';
+
+      // 3. Ancho del Legado (De 65 a 80)
+      // Calcula la duración del segmento de 65 a 80 (80 - max(edad actual, 65))
+      let legacyDuration = Math.max(0, LIFE_EXPECTANCY - Math.max(age, RETIREMENT_AGE));
+      
+      const legacyPct = (legacyDuration / LIFE_EXPECTANCY) * 100;
+      barLegacyEl.style.width = `${legacyPct}%`;
+      barLegacyEl.style.display = legacyPct > 0 ? 'flex' : 'none';
+
+      // FIX: Ocultar el texto de "LEGADO" si la barra es demasiado estrecha para evitar desbordamiento.
+      if (legacyTextEl) {
+        // Se necesitan al menos 10% de ancho para mostrar el texto de "LEGADO" cómodamente en desktop.
+        if (legacyPct < 10 && age < LIFE_EXPECTANCY) {
+            legacyTextEl.classList.add('hidden');
+        } else {
+            legacyTextEl.classList.remove('hidden');
+        }
+      }
+
+      // --- FIX NUEVO: Ocultar textos de PROPÓSITO y RUTINA si la franja Activa es muy estrecha (Evita solapamiento) ---
+      const purposeTextEl = barRealEl.querySelector('span');
+      const routineTextEl = barTrappedEl.querySelector('span');
+
+      // Si el ancho del contenedor activo (0-65) es menor al 15% del total
+      if (activeFuturePct < 15 && age < RETIREMENT_AGE) {
+          // Si es muy pequeño, aseguramos que el texto esté oculto, incluso en desktop.
+          purposeTextEl.classList.remove('md:block');
+          routineTextEl.classList.remove('md:block');
+      } else {
+          // Si hay suficiente espacio, permitimos que se muestre en desktop.
+          purposeTextEl.classList.add('md:block');
+          routineTextEl.classList.add('md:block');
+      }
+
+
+      // --- 4. Ancho Real (Verde) y Atrapado (Rayado) DENTRO del Contenedor Activo ---
+      let realPctInActiveFuture = 0;
+      if (yearsUntilRetirement > 0) {
+        // Effective years are relative to the activeFutureContainerEl's duration
+        realPctInActiveFuture = (effectiveYears / yearsUntilRetirement) * 100;
+      }
+      
+      barRealEl.style.width = `${realPctInActiveFuture}%`;
+      barTrappedEl.style.width = `${100 - realPctInActiveFuture}%`;
+
+
+      // --- B. NÚMERO HÉROE ---
+      bigNumberEl.innerText = effectiveYears.toFixed(1);
+      
+      // Asignación de clases y colores
+      let colorClass;
+      let messageBgClass;
+      let messageH3Class;
+      let messagePClass;
+
+      if (effectiveYears < 5 && age < RETIREMENT_AGE) { // Solo si estás en edad activa
+        colorClass = "text-red-600";
+        messageBgClass = "bg-red-50 border border-red-100";
+        messageH3Class = "text-lg font-bold text-red-900 mb-2 flex justify-center items-center";
+        messagePClass = "text-red-800 text-base md:text-lg leading-relaxed";
+      } else if (effectiveYears < 15 && age < RETIREMENT_AGE) { // Solo si estás en edad activa
+        colorClass = "text-orange-500";
+        messageBgClass = "bg-orange-50 border border-orange-100";
+        messageH3Class = "text-lg font-bold text-orange-900 mb-2 flex justify-center items-center";
+        messagePClass = "text-orange-900 text-base md:text-lg leading-relaxed";
+      } else {
+        colorClass = "text-emerald-600";
+        messageBgClass = "bg-emerald-50 border border-emerald-100";
+        messageH3Class = "text-lg font-bold text-emerald-900 mb-2 flex justify-center items-center";
+        messagePClass = "text-emerald-900 text-base md:text-lg leading-relaxed";
+        
+        // Excepción de color para 65+ (se mantiene gris/azul para coherencia)
+        if (age >= RETIREMENT_AGE) {
+            colorClass = "text-gray-800";
+            messageBgClass = "bg-indigo-50 border border-indigo-100";
+            messageH3Class = "text-lg font-bold text-indigo-900 mb-2 flex justify-center items-center";
+            messagePClass = "text-indigo-800 text-base md:text-lg leading-relaxed";
+        }
+      }
+
+      bigNumberEl.className = `text-8xl md:text-9xl font-black ${colorClass} tracking-tighter leading-none animate-number`;
+      messageBoxEl.className = `mt-8 p-6 rounded-2xl ${messageBgClass} text-center relative z-10 transition-all duration-300`;
+      messageBoxEl.querySelector('h3').className = messageH3Class;
+      analysisTextEl.className = messagePClass;
+
+      // --- C. TEXTO DE ANÁLISIS ---
+      generateAnalysisText(effectiveYears, trappedYearsLost, dailyTrappedHours, age);
+    }
+
+    function generateAnalysisText(effective, lostYears, dailyHours, age) {
+      let lifeStage = "";
+      
+      // 1. Determinar etapa de vida y generar mensaje
+      if (age < 18) {
+        lifeStage = "Etapa de Fundamentos (0 - 17)";
+        analysisTextEl.innerHTML = `
+          <strong>Tu Fase Actual:</strong> ${lifeStage}<br>
+          Tienes <strong>${effective.toFixed(1)} años efectivos hasta el retiro</strong>. Ahora, tu misión es adquirir las herramientas y disciplina para maximizar tu impacto futuro.
+          <br><span class="font-bold mt-2 block">¡El tiempo que construyes ahora es la base de tu libertad!</span>
+        `;
+      } else if (age < RETIREMENT_AGE) {
+        // Fase Activa (18 - 64)
+        lifeStage = age < 40 ? "Etapa de Construcción (18 - 39)" : "Etapa de Maestría (40 - 64)";
+        
+        if (dailyHours > 2) {
+          // Mensaje de Advertencia
+          analysisTextEl.innerHTML = `
+            <strong>Tu Fase Actual:</strong> ${lifeStage}<br>
+            ¡Alerta! Tus <strong>${dailyHours} horas</strong> diarias de tiempo no alineado 
+            están eliminando <strong>${lostYears.toFixed(1)} años completos</strong> de tu etapa activa.
+            <br><span class="font-bold mt-2 block">Tienes un enorme potencial, pero lo estás sacrificando. ¿Vale la pena ese intercambio?</span>
+          `;
+        } else {
+          // Mensaje de Eficiencia
+          analysisTextEl.innerHTML = `
+            <strong>Tu Fase Actual:</strong> ${lifeStage}<br>
+            Tienes <strong>${effective.toFixed(1)} años reales</strong> de Propósito Activo restantes. 
+            <br>¡Excelente gestión! Este es tu capital para construir.
+            <br><span class="font-bold mt-2 block">¡Úsalo para crear tu legado!</span>
+          `;
+        }
+      } else if (age < LIFE_EXPECTANCY) {
+        // Fase de Legado (65 - 79) - Aquí es donde se cambia el mensaje
+        lifeStage = "Etapa de Legado y Libertad (65+)";
+        analysisTextEl.innerHTML = `
+          <strong>Tu Fase Actual:</strong> ${lifeStage}<br>
+          Has completado la etapa de <strong>Propósito Activo (hasta 65)</strong>. Tu cálculo de años efectivos es **${effective.toFixed(1)}**.
+          <br>Te quedan aproximadamente <strong>${LIFE_EXPECTANCY - age} años</strong> hasta el horizonte de visualización (80). 
+          <br><span class="font-bold mt-2 block">Este es tu tiempo para la sabiduría aplicada, el disfrute y la trascendencia.</span>
+        `;
+      } else {
+        // Más de 80 años
+         analysisTextEl.innerHTML = `
+          Según el horizonte de visualización (80), estás en un tiempo extra, un bono.
+          <br><span class="font-bold mt-2 block">Cada momento es un regalo. ¡Vive al máximo!</span>
+        `;
+      }
+    }
+
+    // Listeners
+    [ageInput, trappedInput].forEach(input => {
+      input.addEventListener('input', calculate);
+      input.addEventListener('change', calculate); 
+    });
+
+    // Iniciar
+    calculate();
+
+  </script>
+</body>
+</html>
