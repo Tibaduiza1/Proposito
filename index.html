@@ -80,15 +80,22 @@
         </div>
       </div>
 
-      <!-- Entrada Horas Atrapadas -->
-      <div class="bg-red-50 p-5 rounded-2xl border border-red-100 hover:border-red-300 transition-all shadow-sm group">
+      <!-- Entrada Horas Atrapadas (CON VALIDACIÓN) -->
+      <div class="bg-red-50 p-5 rounded-2xl border border-red-100 transition-all shadow-sm group has-[:invalid]:border-red-500">
         <label for="trappedHoursDaily" class="block text-red-800 font-bold mb-1 text-sm uppercase tracking-wide">Tiempo "Atrapado" Diario</label>
         <div class="flex items-baseline">
           <input type="number" id="trappedHoursDaily" value="2" min="0" max="12.5" step="0.5"
-            class="w-full text-4xl font-black bg-transparent border-b-2 border-red-200 focus:border-red-600 outline-none text-red-900 py-1 transition-colors" placeholder="2.0">
+            class="w-full text-4xl font-black bg-transparent border-b-2 border-red-200 focus:border-red-600 outline-none text-red-900 py-1 transition-colors" 
+            placeholder="2.0">
           <span class="text-lg text-red-400 font-semibold ml-2">horas/día</span>
         </div>
-        <p class="text-xs text-red-500 mt-2 font-medium opacity-80">Redes, TV, tráfico, procrastinación...</p>
+        
+        <!-- Mensaje de error para la validación de 12.5 horas -->
+        <p id="trappedError" class="text-xs text-red-500 mt-2 font-bold transition-all duration-300 h-0 overflow-hidden opacity-0">
+          ❌ ERROR: No puedes tener más de 12.5 horas atrapadas (24h - 11.5h de mantenimiento biológico).
+        </p>
+        
+        <p class="text-xs text-red-500 mt-2 font-medium opacity-80" id="trappedDescription">Redes, TV, tráfico, procrastinación...</p>
       </div>
     </div>
 
@@ -129,17 +136,17 @@
         
         <!-- Contenedor Futuro ACTIVO (de la edad actual a 65) -->
         <div id="activeFutureContainer" class="h-full flex relative transition-all duration-700 ease-out">
-           <!-- 2. Real (Verde vibrante) -->
-           <div id="barReal" class="h-full bg-gradient-to-r from-emerald-500 to-green-500 shadow-lg relative z-20 transition-all duration-700 ease-out flex items-center justify-center">
-                <!-- Brillo sutil -->
-                <div class="absolute inset-0 bg-white opacity-20" style="background-image: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);"></div>
-                <span class="text-white text-xs font-bold drop-shadow-md hidden md:block z-30">TÚ</span>
-           </div>
-           
-           <!-- 3. Desperdicio + Bio (Rayado) -->
-           <div id="barTrapped" class="h-full trapped-pattern relative z-10 border-l border-white/20 transition-all duration-700 ease-out flex items-center justify-center">
-                <span class="text-gray-500 text-xs font-bold opacity-60 hidden md:block bg-white/50 px-1 rounded">RUTINA</span>
-           </div>
+            <!-- 2. Real (Verde vibrante) -->
+            <div id="barReal" class="h-full bg-gradient-to-r from-emerald-500 to-green-500 shadow-lg relative z-20 transition-all duration-700 ease-out flex items-center justify-center">
+                 <!-- Brillo sutil -->
+                 <div class="absolute inset-0 bg-white opacity-20" style="background-image: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);"></div>
+                 <span class="text-white text-xs font-bold drop-shadow-md hidden md:block z-30">TÚ</span>
+            </div>
+            
+            <!-- 3. Desperdicio + Bio (Rayado) -->
+            <div id="barTrapped" class="h-full trapped-pattern relative z-10 border-l border-white/20 transition-all duration-700 ease-out flex items-center justify-center">
+                 <span class="text-gray-500 text-xs font-bold opacity-60 hidden md:block bg-white/50 px-1 rounded">RUTINA</span>
+            </div>
         </div>
 
         <!-- 4. Legacy/Freedom Time (65 to 80) -->
@@ -174,22 +181,61 @@
     const LIFE_EXPECTANCY = 80; // Límite visual de la barra de vida
     const RETIREMENT_AGE = 65; // Nuevo límite para el cálculo de "Años Efectivos"
     const BIOLOGICAL_MAINTENANCE = 11.5; // El "impuesto biológico" fijo
-    
+    const MAX_TRAPPED_HOURS = 24 - BIOLOGICAL_MAINTENANCE; // 12.5 horas
+
     // --- REFERENCIAS DOM ---
     const ageInput = document.getElementById('currentAge');
     const trappedInput = document.getElementById('trappedHoursDaily');
+    const trappedErrorEl = document.getElementById('trappedError'); // Referencia al error
+    const trappedDescriptionEl = document.getElementById('trappedDescription'); // Referencia a la descripción
     const bigNumberEl = document.getElementById('bigNumber');
     const analysisTextEl = document.getElementById('analysisText');
     const barPastEl = document.getElementById('barPast');
-    const activeFutureContainerEl = document.getElementById('activeFutureContainer'); // Nuevo contenedor para 0-65
+    const activeFutureContainerEl = document.getElementById('activeFutureContainer');
     const barRealEl = document.getElementById('barReal');
     const barTrappedEl = document.getElementById('barTrapped');
-    const barLegacyEl = document.getElementById('barLegacy'); // Nuevo segmento para 65-80
+    const barLegacyEl = document.getElementById('barLegacy');
     const messageBoxEl = document.getElementById('dynamicMessage');
-    const legacyTextEl = document.getElementById('legacyText'); // Referencia al texto de Legado
+    const legacyTextEl = document.getElementById('legacyText');
     
+    // Estado de la validación
+    let isTrappedInputValid = true;
+
+    function validateTrappedHours() {
+      let trappedDaily = parseFloat(trappedInput.value);
+
+      // Si es un número válido y es mayor que el máximo permitido
+      if (!isNaN(trappedDaily) && trappedDaily > MAX_TRAPPED_HOURS) {
+        // Mostrar error
+        trappedErrorEl.style.height = 'auto';
+        trappedErrorEl.style.opacity = '1';
+        trappedDescriptionEl.classList.add('hidden');
+        trappedInput.classList.add('border-red-500', 'focus:border-red-700');
+        trappedInput.classList.remove('focus:border-red-600');
+        isTrappedInputValid = false;
+      } else {
+        // Ocultar error
+        trappedErrorEl.style.height = '0';
+        trappedErrorEl.style.opacity = '0';
+        trappedDescriptionEl.classList.remove('hidden');
+        trappedInput.classList.remove('border-red-500', 'focus:border-red-700');
+        trappedInput.classList.add('focus:border-red-600');
+        isTrappedInputValid = true;
+      }
+    }
+
     function calculate() {
-      // 1. Obtener y Limpiar Valores
+      // 1. Validar primero antes de proceder con la lógica
+      validateTrappedHours();
+
+      // Si la validación falla, detenemos el cálculo y mostramos 0 en el número grande
+      if (!isTrappedInputValid) {
+        bigNumberEl.innerText = 'N/A';
+        analysisTextEl.innerHTML = 'Por favor, corrige el error en el campo "Tiempo Atrapado" para ver el cálculo.';
+        return;
+      }
+      
+      // 2. Obtener y Limpiar Valores
       let age = parseFloat(ageInput.value);
       let trappedDaily = parseFloat(trappedInput.value);
 
@@ -197,16 +243,14 @@
       if (isNaN(age)) age = 0;
       if (isNaN(trappedDaily)) trappedDaily = 0;
 
-      // Límites duros para evitar romper la lógica visual
+      // Límites duros para evitar romper la lógica visual (ya estaban)
       if (age > 79) age = 79;
       if (age < 0) age = 0;
-      
-      // El máximo atrapado posible es 24 - 11.5 = 12.5
-      const maxTrapped = 24 - BIOLOGICAL_MAINTENANCE;
       if (trappedDaily < 0) trappedDaily = 0;
-      if (trappedDaily > maxTrapped) trappedDaily = maxTrapped;
+      // Nota: El límite superior (MAX_TRAPPED_HOURS) ahora lo gestiona la función validateTrappedHours() para feedback al usuario. 
+      // Si la validación pasa, trappedDaily es <= 12.5.
 
-      // 2. Lógica Matemática
+      // 3. Lógica Matemática
       
       // Años restantes hasta el retiro (65 años)
       const yearsUntilRetirement = Math.max(0, RETIREMENT_AGE - age);
@@ -224,7 +268,7 @@
       const trappedFactor = trappedDaily / 24;
       const yearsLostToTrap = yearsUntilRetirement * trappedFactor;
 
-      // 3. Actualizar UI
+      // 4. Actualizar UI
       updateVisuals(age, yearsUntilRetirement, realEffectiveYears, yearsLostToTrap, trappedDaily);
     }
 
@@ -242,7 +286,6 @@
       activeFutureContainerEl.style.display = activeFuturePct > 0 ? 'flex' : 'none';
 
       // 3. Ancho del Legado (De 65 a 80)
-      // Calcula la duración del segmento de 65 a 80 (80 - max(edad actual, 65))
       let legacyDuration = Math.max(0, LIFE_EXPECTANCY - Math.max(age, RETIREMENT_AGE));
       
       const legacyPct = (legacyDuration / LIFE_EXPECTANCY) * 100;
@@ -251,7 +294,6 @@
 
       // FIX: Ocultar el texto de "LEGADO" si la barra es demasiado estrecha para evitar desbordamiento.
       if (legacyTextEl) {
-        // Se necesitan al menos 10% de ancho para mostrar el texto de "LEGADO" cómodamente en desktop.
         if (legacyPct < 10 && age < LIFE_EXPECTANCY) {
             legacyTextEl.classList.add('hidden');
         } else {
@@ -263,13 +305,10 @@
       const purposeTextEl = barRealEl.querySelector('span');
       const routineTextEl = barTrappedEl.querySelector('span');
 
-      // Si el ancho del contenedor activo (0-65) es menor al 15% del total
       if (activeFuturePct < 15 && age < RETIREMENT_AGE) {
-          // Si es muy pequeño, aseguramos que el texto esté oculto, incluso en desktop.
           purposeTextEl.classList.remove('md:block');
           routineTextEl.classList.remove('md:block');
       } else {
-          // Si hay suficiente espacio, permitimos que se muestre en desktop.
           purposeTextEl.classList.add('md:block');
           routineTextEl.classList.add('md:block');
       }
@@ -278,7 +317,6 @@
       // --- 4. Ancho Real (Verde) y Atrapado (Rayado) DENTRO del Contenedor Activo ---
       let realPctInActiveFuture = 0;
       if (yearsUntilRetirement > 0) {
-        // Effective years are relative to the activeFutureContainerEl's duration
         realPctInActiveFuture = (effectiveYears / yearsUntilRetirement) * 100;
       }
       
@@ -337,7 +375,7 @@
         lifeStage = "Etapa de Fundamentos (0 - 17)";
         analysisTextEl.innerHTML = `
           <strong>Tu Fase Actual:</strong> ${lifeStage}<br>
-          Tienes <strong>${effective.toFixed(1)} años efectivos hasta el retiro</strong>. Ahora, tu misión es adquirir las herramientas y disciplina para maximizar tu impacto futuro.
+          Tus <strong>${effective.toFixed(1)} años efectivos hasta el retiro</strong> son tu motivación. Ahora, tu misión es adquirir las herramientas y disciplina para maximizar tu impacto futuro.
           <br><span class="font-bold mt-2 block">¡El tiempo que construyes ahora es la base de tu libertad!</span>
         `;
       } else if (age < RETIREMENT_AGE) {
@@ -356,8 +394,8 @@
           // Mensaje de Eficiencia
           analysisTextEl.innerHTML = `
             <strong>Tu Fase Actual:</strong> ${lifeStage}<br>
-            Tienes <strong>${effective.toFixed(1)} años reales</strong> de Propósito Activo restantes. 
-            <br>¡Excelente gestión! Este es tu capital para construir.
+            Tus <strong>${effective.toFixed(1)} años reales</strong> de Propósito Activo restantes son tu capital. 
+            <br>¡Excelente gestión! Usa este tiempo para construir el futuro que deseas.
             <br><span class="font-bold mt-2 block">¡Úsalo para crear tu legado!</span>
           `;
         }
@@ -372,7 +410,7 @@
         `;
       } else {
         // Más de 80 años
-         analysisTextEl.innerHTML = `
+          analysisTextEl.innerHTML = `
           Según el horizonte de visualización (80), estás en un tiempo extra, un bono.
           <br><span class="font-bold mt-2 block">Cada momento es un regalo. ¡Vive al máximo!</span>
         `;
@@ -381,6 +419,7 @@
 
     // Listeners
     [ageInput, trappedInput].forEach(input => {
+      // Usamos 'input' para una validación en tiempo real y 'change' para asegurar la ejecución al salir del campo.
       input.addEventListener('input', calculate);
       input.addEventListener('change', calculate); 
     });
