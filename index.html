@@ -71,13 +71,18 @@
     <!-- Panel de Control (Inputs) -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 relative z-10">
       <!-- Entrada Edad -->
-      <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 hover:border-blue-300 transition-all shadow-sm group">
+      <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 transition-all shadow-sm group">
         <label for="currentAge" class="block text-blue-800 font-bold mb-1 text-sm uppercase tracking-wide">Tu Edad Actual</label>
         <div class="flex items-baseline">
-          <input type="number" id="currentAge" value="30" min="0" max="79"
+          <input type="number" id="currentAge" value="30" min="0" max="60" step="1"
             class="w-full text-4xl font-black bg-transparent border-b-2 border-blue-200 focus:border-blue-600 outline-none text-blue-900 py-1 transition-colors" placeholder="30">
           <span class="text-lg text-blue-400 font-semibold ml-2">años</span>
         </div>
+        
+        <!-- Mensaje de error para la validación de edad máxima -->
+        <p id="ageError" class="text-xs text-red-500 mt-2 font-bold transition-all duration-300 h-0 overflow-hidden opacity-0">
+          ❌ ERROR: La edad máxima permitida es 60 años para este cálculo.
+        </p>
       </div>
 
       <!-- Entrada Horas Atrapadas (CON VALIDACIÓN) -->
@@ -182,10 +187,12 @@
     const RETIREMENT_AGE = 65; // Nuevo límite para el cálculo de "Años Efectivos"
     const BIOLOGICAL_MAINTENANCE = 11.5; // El "impuesto biológico" fijo
     const MAX_TRAPPED_HOURS = 24 - BIOLOGICAL_MAINTENANCE; // 12.5 horas
+    const MAX_AGE = 60; // Nuevo: Edad máxima permitida
 
     // --- REFERENCIAS DOM ---
     const ageInput = document.getElementById('currentAge');
     const trappedInput = document.getElementById('trappedHoursDaily');
+    const ageErrorEl = document.getElementById('ageError'); // Referencia al error de edad
     const trappedErrorEl = document.getElementById('trappedError'); // Referencia al error
     const trappedDescriptionEl = document.getElementById('trappedDescription'); // Referencia a la descripción
     const bigNumberEl = document.getElementById('bigNumber');
@@ -200,6 +207,31 @@
     
     // Estado de la validación
     let isTrappedInputValid = true;
+    let isAgeInputValid = true; // Nuevo: Estado para validación de edad
+
+    // --- FUNCIONES DE VALIDACIÓN ---
+
+    // Validación para el campo de edad
+    function validateCurrentAge() {
+      let currentAge = parseFloat(ageInput.value);
+
+      // Si es un número válido y es mayor que el máximo permitido
+      if (!isNaN(currentAge) && currentAge > MAX_AGE) {
+        // Mostrar error
+        ageErrorEl.style.height = 'auto';
+        ageErrorEl.style.opacity = '1';
+        ageInput.classList.add('border-red-500', 'focus:border-red-700');
+        ageInput.classList.remove('focus:border-blue-600');
+        isAgeInputValid = false;
+      } else {
+        // Ocultar error
+        ageErrorEl.style.height = '0';
+        ageErrorEl.style.opacity = '0';
+        ageInput.classList.remove('border-red-500', 'focus:border-red-700');
+        ageInput.classList.add('focus:border-blue-600');
+        isAgeInputValid = true;
+      }
+    }
 
     function validateTrappedHours() {
       let trappedDaily = parseFloat(trappedInput.value);
@@ -226,12 +258,18 @@
 
     function calculate() {
       // 1. Validar primero antes de proceder con la lógica
+      validateCurrentAge(); // Nuevo: Validar edad primero
       validateTrappedHours();
 
-      // Si la validación falla, detenemos el cálculo y mostramos 0 en el número grande
-      if (!isTrappedInputValid) {
-        bigNumberEl.innerText = 'N/A';
-        analysisTextEl.innerHTML = 'Por favor, corrige el error en el campo "Tiempo Atrapado" para ver el cálculo.';
+      // Si la validación falla, detenemos el cálculo y mostramos mensaje apropiado
+      if (!isAgeInputValid || !isTrappedInputValid) {
+        if (!isAgeInputValid) {
+          bigNumberEl.innerText = 'N/A';
+          analysisTextEl.innerHTML = 'Por favor, corrige el error en el campo "Tu Edad Actual". La edad máxima permitida es 60 años.';
+        } else if (!isTrappedInputValid) {
+          bigNumberEl.innerText = 'N/A';
+          analysisTextEl.innerHTML = 'Por favor, corrige el error en el campo "Tiempo Atrapado" para ver el cálculo.';
+        }
         return;
       }
       
