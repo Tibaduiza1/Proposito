@@ -79,9 +79,9 @@
           <span class="text-lg text-blue-400 font-semibold ml-2">años</span>
         </div>
         
-        <!-- Mensaje de error para la validación de edad máxima -->
+        <!-- Mensaje de error para la validación de edad (mínima y máxima) -->
         <p id="ageError" class="text-xs text-red-500 mt-2 font-bold transition-all duration-300 h-0 overflow-hidden opacity-0">
-          ❌ ERROR: La edad máxima permitida es 60 años para este cálculo.
+          <!-- El mensaje de error se insertará dinámicamente con JavaScript -->
         </p>
       </div>
 
@@ -108,7 +108,7 @@
     <div id="heroSection" class="text-center mb-10 py-8 bg-gradient-to-b from-white to-gray-50 rounded-3xl shadow-sm border border-gray-200 relative z-10">
       <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Tu verdadero capital disponible</p>
       
-      <div class="flex flex-col md:flex-row justify-center items-center md:items-baseline gap-2 md:gap-4">
+      <div class="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-4">
         <span id="bigNumber" class="text-8xl md:text-9xl font-black text-gray-800 tracking-tighter leading-none animate-number">0</span>
         <div class="flex flex-col items-center md:items-start">
           <span class="text-3xl md:text-4xl font-bold text-gray-700 leading-none">Años</span>
@@ -187,7 +187,8 @@
     const RETIREMENT_AGE = 65; // Nuevo límite para el cálculo de "Años Efectivos"
     const BIOLOGICAL_MAINTENANCE = 11.5; // El "impuesto biológico" fijo
     const MAX_TRAPPED_HOURS = 24 - BIOLOGICAL_MAINTENANCE; // 12.5 horas
-    const MAX_AGE = 60; // Nuevo: Edad máxima permitida
+    const MAX_AGE = 60; // Edad máxima permitida
+    const MIN_AGE = 14; // Edad mínima permitida (NUEVO)
 
     // --- REFERENCIAS DOM ---
     const ageInput = document.getElementById('currentAge');
@@ -207,29 +208,44 @@
     
     // Estado de la validación
     let isTrappedInputValid = true;
-    let isAgeInputValid = true; // Nuevo: Estado para validación de edad
+    let isAgeInputValid = true; // Estado para validación de edad
 
     // --- FUNCIONES DE VALIDACIÓN ---
 
-    // Validación para el campo de edad
+    // Validación para el campo de edad (ahora verifica mínimo y máximo)
     function validateCurrentAge() {
       let currentAge = parseFloat(ageInput.value);
+      let errorMessage = '';
 
-      // Si es un número válido y es mayor que el máximo permitido
-      if (!isNaN(currentAge) && currentAge > MAX_AGE) {
-        // Mostrar error
+      // Si es un número válido y está fuera de los límites permitidos
+      if (!isNaN(currentAge)) {
+        if (currentAge < MIN_AGE) {
+          errorMessage = `❌ ERROR: La edad mínima permitida es ${MIN_AGE} años para este cálculo.`;
+          isAgeInputValid = false;
+        } else if (currentAge > MAX_AGE) {
+          errorMessage = `❌ ERROR: La edad máxima permitida es ${MAX_AGE} años para este cálculo.`;
+          isAgeInputValid = false;
+        } else {
+          // Edad válida
+          ageErrorEl.style.height = '0';
+          ageErrorEl.style.opacity = '0';
+          ageInput.classList.remove('border-red-500', 'focus:border-red-700');
+          ageInput.classList.add('focus:border-blue-600');
+          isAgeInputValid = true;
+          return;
+        }
+      } else {
+        // No es un número válido (campo vacío o inválido)
+        isAgeInputValid = false;
+      }
+
+      // Mostrar error si existe
+      if (errorMessage) {
+        ageErrorEl.innerText = errorMessage;
         ageErrorEl.style.height = 'auto';
         ageErrorEl.style.opacity = '1';
         ageInput.classList.add('border-red-500', 'focus:border-red-700');
         ageInput.classList.remove('focus:border-blue-600');
-        isAgeInputValid = false;
-      } else {
-        // Ocultar error
-        ageErrorEl.style.height = '0';
-        ageErrorEl.style.opacity = '0';
-        ageInput.classList.remove('border-red-500', 'focus:border-red-700');
-        ageInput.classList.add('focus:border-blue-600');
-        isAgeInputValid = true;
       }
     }
 
@@ -258,17 +274,17 @@
 
     function calculate() {
       // 1. Validar primero antes de proceder con la lógica
-      validateCurrentAge(); // Nuevo: Validar edad primero
+      validateCurrentAge(); // Validar edad primero
       validateTrappedHours();
 
       // Si la validación falla, detenemos el cálculo y mostramos mensaje apropiado
       if (!isAgeInputValid || !isTrappedInputValid) {
         if (!isAgeInputValid) {
           bigNumberEl.innerText = 'N/A';
-          analysisTextEl.innerHTML = 'Por favor, corrige el error en el campo "Tu Edad Actual". La edad máxima permitida es 60 años.';
+          analysisTextEl.innerHTML = '⚠️ Por favor, corrige el error en el campo "Tu Edad Actual". La edad debe estar entre 14 y 60 años para este cálculo.';
         } else if (!isTrappedInputValid) {
           bigNumberEl.innerText = 'N/A';
-          analysisTextEl.innerHTML = 'Por favor, corrige el error en el campo "Tiempo Atrapado" para ver el cálculo.';
+          analysisTextEl.innerHTML = '⚠️ Por favor, corrige el error en el campo "Tiempo Atrapado" para ver el cálculo.';
         }
         return;
       }
@@ -281,12 +297,10 @@
       if (isNaN(age)) age = 0;
       if (isNaN(trappedDaily)) trappedDaily = 0;
 
-      // Límites duros para evitar romper la lógica visual (ya estaban)
+      // Límites duros para evitar romper la lógica visual
       if (age > 79) age = 79;
       if (age < 0) age = 0;
       if (trappedDaily < 0) trappedDaily = 0;
-      // Nota: El límite superior (MAX_TRAPPED_HOURS) ahora lo gestiona la función validateTrappedHours() para feedback al usuario. 
-      // Si la validación pasa, trappedDaily es <= 12.5.
 
       // 3. Lógica Matemática
       
@@ -402,7 +416,7 @@
       analysisTextEl.className = messagePClass;
 
       // --- C. TEXTO DE ANÁLISIS ---
-      generateAnalysisText(effectiveYears, trappedYearsLost, dailyTrappedHours, age);
+      generateAnalysisText(effectiveYears, lostYears, dailyHours, age);
     }
 
     function generateAnalysisText(effective, lostYears, dailyHours, age) {
@@ -468,4 +482,3 @@
   </script>
 </body>
 </html>
-
