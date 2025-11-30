@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calculadora de Vida con Propósito - Tu Tiempo Efectivo</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com "></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com ">
+  <link rel="preconnect" href="https://fonts.gstatic.com " crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400 ;600;900&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -79,9 +79,9 @@
           <span class="text-lg text-blue-400 font-semibold ml-2">años</span>
         </div>
         
-        <!-- Mensaje de error para la validación de edad (mínima y máxima) -->
+        <!-- Mensaje de error para la validación de edad -->
         <p id="ageError" class="text-xs text-red-500 mt-2 font-bold transition-all duration-300 h-0 overflow-hidden opacity-0">
-          <!-- El mensaje de error se insertará dinámicamente con JavaScript -->
+          <!-- El texto se llena dinámicamente con JS -->
         </p>
       </div>
 
@@ -108,7 +108,7 @@
     <div id="heroSection" class="text-center mb-10 py-8 bg-gradient-to-b from-white to-gray-50 rounded-3xl shadow-sm border border-gray-200 relative z-10">
       <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Tu verdadero capital disponible</p>
       
-      <div class="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-4">
+      <div class="flex flex-col md:flex-row justify-center items-center md:items-baseline gap-2 md:gap-4">
         <span id="bigNumber" class="text-8xl md:text-9xl font-black text-gray-800 tracking-tighter leading-none animate-number">0</span>
         <div class="flex flex-col items-center md:items-start">
           <span class="text-3xl md:text-4xl font-bold text-gray-700 leading-none">Años</span>
@@ -188,7 +188,7 @@
     const BIOLOGICAL_MAINTENANCE = 11.5; // El "impuesto biológico" fijo
     const MAX_TRAPPED_HOURS = 24 - BIOLOGICAL_MAINTENANCE; // 12.5 horas
     const MAX_AGE = 60; // Edad máxima permitida
-    const MIN_AGE = 14; // Edad mínima permitida (NUEVO)
+    const MIN_AGE = 14; // NUEVO: Edad mínima permitida
 
     // --- REFERENCIAS DOM ---
     const ageInput = document.getElementById('currentAge');
@@ -208,45 +208,44 @@
     
     // Estado de la validación
     let isTrappedInputValid = true;
-    let isAgeInputValid = true; // Estado para validación de edad
+    let isAgeInputValid = true; // Nuevo: Estado para validación de edad
 
     // --- FUNCIONES DE VALIDACIÓN ---
 
-    // Validación para el campo de edad (ahora verifica mínimo y máximo)
+    // Validación para el campo de edad
     function validateCurrentAge() {
       let currentAge = parseFloat(ageInput.value);
-      let errorMessage = '';
+      
+      // Limpiar estados previos
+      ageErrorEl.style.height = '0';
+      ageErrorEl.style.opacity = '0';
+      ageInput.classList.remove('border-red-500', 'focus:border-red-700');
+      ageInput.classList.add('focus:border-blue-600');
+      isAgeInputValid = true;
 
-      // Si es un número válido y está fuera de los límites permitidos
-      if (!isNaN(currentAge)) {
-        if (currentAge < MIN_AGE) {
-          errorMessage = `❌ ERROR: La edad mínima permitida es ${MIN_AGE} años para este cálculo.`;
-          isAgeInputValid = false;
-        } else if (currentAge > MAX_AGE) {
-          errorMessage = `❌ ERROR: La edad máxima permitida es ${MAX_AGE} años para este cálculo.`;
-          isAgeInputValid = false;
-        } else {
-          // Edad válida
-          ageErrorEl.style.height = '0';
-          ageErrorEl.style.opacity = '0';
-          ageInput.classList.remove('border-red-500', 'focus:border-red-700');
-          ageInput.classList.add('focus:border-blue-600');
-          isAgeInputValid = true;
-          return;
-        }
-      } else {
-        // No es un número válido (campo vacío o inválido)
+      // Si el campo está vacío o no es número, no validamos aún (o se trata como 0 abajo)
+      if (isNaN(currentAge)) return;
+
+      // VALIDACIÓN: Menor de 14 años
+      if (currentAge < MIN_AGE) {
+        ageErrorEl.textContent = "❌ ERROR: La edad mínima permitida es 14 años.";
+        showAgeError();
+        isAgeInputValid = false;
+      } 
+      // VALIDACIÓN: Mayor de 60 años
+      else if (currentAge > MAX_AGE) {
+        ageErrorEl.textContent = "❌ ERROR: La edad máxima permitida es 60 años para este cálculo.";
+        showAgeError();
         isAgeInputValid = false;
       }
+    }
 
-      // Mostrar error si existe
-      if (errorMessage) {
-        ageErrorEl.innerText = errorMessage;
-        ageErrorEl.style.height = 'auto';
-        ageErrorEl.style.opacity = '1';
-        ageInput.classList.add('border-red-500', 'focus:border-red-700');
-        ageInput.classList.remove('focus:border-blue-600');
-      }
+    // Función auxiliar para mostrar visualmente el error de edad
+    function showAgeError() {
+      ageErrorEl.style.height = 'auto';
+      ageErrorEl.style.opacity = '1';
+      ageInput.classList.add('border-red-500', 'focus:border-red-700');
+      ageInput.classList.remove('focus:border-blue-600');
     }
 
     function validateTrappedHours() {
@@ -274,17 +273,17 @@
 
     function calculate() {
       // 1. Validar primero antes de proceder con la lógica
-      validateCurrentAge(); // Validar edad primero
+      validateCurrentAge(); 
       validateTrappedHours();
 
       // Si la validación falla, detenemos el cálculo y mostramos mensaje apropiado
       if (!isAgeInputValid || !isTrappedInputValid) {
         if (!isAgeInputValid) {
           bigNumberEl.innerText = 'N/A';
-          analysisTextEl.innerHTML = '⚠️ Por favor, corrige el error en el campo "Tu Edad Actual". La edad debe estar entre 14 y 60 años para este cálculo.';
+          analysisTextEl.innerHTML = 'Por favor, corrige el error en el campo "Tu Edad Actual". La edad debe estar entre 14 y 60 años.';
         } else if (!isTrappedInputValid) {
           bigNumberEl.innerText = 'N/A';
-          analysisTextEl.innerHTML = '⚠️ Por favor, corrige el error en el campo "Tiempo Atrapado" para ver el cálculo.';
+          analysisTextEl.innerHTML = 'Por favor, corrige el error en el campo "Tiempo Atrapado" para ver el cálculo.';
         }
         return;
       }
@@ -297,7 +296,7 @@
       if (isNaN(age)) age = 0;
       if (isNaN(trappedDaily)) trappedDaily = 0;
 
-      // Límites duros para evitar romper la lógica visual
+      // Límites duros para evitar romper la lógica visual (aunque la validación ya nos protege)
       if (age > 79) age = 79;
       if (age < 0) age = 0;
       if (trappedDaily < 0) trappedDaily = 0;
@@ -416,7 +415,7 @@
       analysisTextEl.className = messagePClass;
 
       // --- C. TEXTO DE ANÁLISIS ---
-      generateAnalysisText(effectiveYears, lostYears, dailyHours, age);
+      generateAnalysisText(effectiveYears, trappedYearsLost, dailyTrappedHours, age);
     }
 
     function generateAnalysisText(effective, lostYears, dailyHours, age) {
