@@ -281,7 +281,7 @@
       if (!isAgeInputValid || !isTrappedInputValid) {
         if (!isAgeInputValid) {
           bigNumberEl.innerText = 'N/A';
-          analysisTextEl.innerHTML = 'Por favor, corrige el error en el campo "Tu Edad Actual". La edad debe estar entre 14 y 60 años.';
+          analysisTextEl.innerHTML = 'Por favor, verifica el campo "Tu Edad Actual". El análisis está diseñado para personas entre 14 y 60 años.<br><br>Si tu edad es significativamente menor o mayor, es posible que el ejercicio no genere el impacto deseado o que los consejos no se ajusten a tu etapa de vida. Siéntete libre de continuar, pero ten en cuenta este contexto.';
         } else if (!isTrappedInputValid) {
           bigNumberEl.innerText = 'N/A';
           analysisTextEl.innerHTML = 'Por favor, corrige el error en el campo "Tiempo Atrapado" para ver el cálculo.';
@@ -482,6 +482,7 @@
   </script>
 </body>
 </html>
+
 
 
 
