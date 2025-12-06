@@ -253,21 +253,21 @@
           <!-- 2. FUTURO ACTIVO -->
           <div id="barActiveContainer" class="flex h-full transition-all duration-700 bg-white relative" style="width: 50%">
             
-            <!-- A. Mantenimiento Biológico (CORREGIDO: Etiquetas Responsivas) -->
+            <!-- A. Mantenimiento Biológico (CORREGIDO: BASE) -->
             <div id="barBio" class="pattern-bio h-full flex items-center justify-center border-r border-slate-300/50 relative overflow-hidden" style="width: 48%">
               <!-- Contenedor de etiqueta que el JS buscará -->
               <span class="bar-label-container bar-label text-slate-400 text-[9px] font-bold px-1 whitespace-nowrap text-center">
-                  <!-- Muestra "BIO" en móvil, "MANTENIMIENTO" en PC (md) -->
-                  <span class="md:hidden">BIO</span>
+                  <!-- Muestra "BASE" en móvil (4 letras), "MANTENIMIENTO" en PC -->
+                  <span class="md:hidden">BASE</span>
                   <span class="hidden md:inline">MANTENIMIENTO</span>
               </span>
             </div>
 
-            <!-- B. Tiempo Atrapado -->
+            <!-- B. Tiempo Atrapado (CORREGIDO: FUGA) -->
             <div id="barTrapped" class="pattern-trapped h-full flex items-center justify-center border-r border-red-100 transition-all duration-300 overflow-hidden" style="width: 30%">
               <span class="bar-label-container bar-label text-red-900 text-[9px] font-bold bg-white/40 px-1 rounded whitespace-nowrap text-center">
-                   <!-- Muestra "RUTINA" en móvil (más corto), "ATRAPADO" en PC -->
-                   <span class="md:hidden">RUTINA</span>
+                   <!-- Muestra "FUGA" en móvil (4 letras), "ATRAPADO" en PC -->
+                   <span class="md:hidden">FUGA</span>
                    <span class="hidden md:inline">ATRAPADO</span>
               </span>
             </div>
@@ -289,8 +289,8 @@
         <!-- Leyenda -->
         <div class="mt-4 flex flex-wrap justify-center gap-3 md:gap-6 text-[10px] md:text-xs text-slate-500 font-medium">
           <div class="flex items-center"><div class="w-3 h-3 bg-slate-500 rounded-sm mr-1.5"></div> Pasado</div>
-          <div class="flex items-center"><div class="w-3 h-3 pattern-bio border border-slate-300 rounded-sm mr-1.5"></div> Bio (11.5h)</div>
-          <div class="flex items-center"><div class="w-3 h-3 pattern-trapped border border-red-300 rounded-sm mr-1.5"></div> Atrapado</div>
+          <div class="flex items-center"><div class="w-3 h-3 pattern-bio border border-slate-300 rounded-sm mr-1.5"></div> Base (11.5h)</div>
+          <div class="flex items-center"><div class="w-3 h-3 pattern-trapped border border-red-300 rounded-sm mr-1.5"></div> Fuga</div>
           <div class="flex items-center"><div class="w-3 h-3 bg-emerald-500 rounded-sm mr-1.5 shadow-sm"></div> Tú (Constructor)</div>
         </div>
       </div>
@@ -308,7 +308,7 @@
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
         <h3 class="font-bold text-base text-slate-600 mb-1">🔒 Mantenimiento Biológico</h3>
         <p class="text-xs text-slate-600 leading-relaxed">
-          La franja gris clara. Representa sueño (8h), higiene y comida (3.5h). Es el "impuesto biológico" de estar vivo. No es tiempo disponible.
+          La franja gris clara. Representa sueño (8h), higiene, comida y <strong>transporte/desplazamientos</strong> (3.5h). Es la base obligatoria para funcionar.
         </p>
       </div>
     </section>
