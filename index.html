@@ -105,6 +105,11 @@
     .bar-label {
       transition: opacity 0.3s ease;
       opacity: 1;
+      white-space: nowrap; /* Evita que el texto salte de línea */
+      overflow: hidden;    /* Corta si es necesario */
+      text-overflow: ellipsis; 
+      max-width: 100%;
+      display: inline-block;
     }
     .hide-label { 
       opacity: 0 !important; 
@@ -239,25 +244,37 @@
           
           <!-- 1. PASADO -->
           <div id="barPast" class="bg-slate-500 h-full flex items-center justify-center border-r border-white/20 transition-all duration-700 relative overflow-hidden" style="width: 30%">
-            <span class="text-white text-[10px] font-bold px-1 whitespace-nowrap z-10 bar-label">VIVIDO</span>
+            <!-- En móvil: "VIVIDO", en Desktop: "VIVIDO" (Es corto, se queda igual) -->
+            <span class="text-white text-[10px] font-bold px-1 whitespace-nowrap z-10 bar-label-container bar-label">
+                VIVIDO
+            </span>
           </div>
 
           <!-- 2. FUTURO ACTIVO -->
           <div id="barActiveContainer" class="flex h-full transition-all duration-700 bg-white relative" style="width: 50%">
             
-            <!-- A. Mantenimiento Biológico (CORREGIDO: Sin rotación) -->
+            <!-- A. Mantenimiento Biológico (CORREGIDO: Etiquetas Responsivas) -->
             <div id="barBio" class="pattern-bio h-full flex items-center justify-center border-r border-slate-300/50 relative overflow-hidden" style="width: 48%">
-              <span class="text-slate-400 text-[9px] font-bold px-1 rounded whitespace-nowrap bar-label">MANTENIMIENTO</span>
+              <!-- Contenedor de etiqueta que el JS buscará -->
+              <span class="bar-label-container bar-label text-slate-400 text-[9px] font-bold px-1 whitespace-nowrap text-center">
+                  <!-- Muestra "BIO" en móvil, "MANTENIMIENTO" en PC (md) -->
+                  <span class="md:hidden">BIO</span>
+                  <span class="hidden md:inline">MANTENIMIENTO</span>
+              </span>
             </div>
 
             <!-- B. Tiempo Atrapado -->
             <div id="barTrapped" class="pattern-trapped h-full flex items-center justify-center border-r border-red-100 transition-all duration-300 overflow-hidden" style="width: 30%">
-              <span class="text-red-900 text-[9px] font-bold bg-white/40 px-1 rounded whitespace-nowrap bar-label">ATRAPADO</span>
+              <span class="bar-label-container bar-label text-red-900 text-[9px] font-bold bg-white/40 px-1 rounded whitespace-nowrap text-center">
+                   <!-- Muestra "RUTINA" en móvil (más corto), "ATRAPADO" en PC -->
+                   <span class="md:hidden">RUTINA</span>
+                   <span class="hidden md:inline">ATRAPADO</span>
+              </span>
             </div>
 
             <!-- C. Tiempo Constructor -->
             <div id="barConstructor" class="bg-emerald-500 h-full flex items-center justify-center relative transition-all duration-500 overflow-hidden" style="width: 22%">
-              <span class="text-white text-[10px] font-bold drop-shadow-md z-10 whitespace-nowrap bar-label">TÚ</span>
+              <span class="text-white text-[10px] font-bold drop-shadow-md z-10 whitespace-nowrap bar-label-container bar-label">TÚ</span>
               <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
             </div>
 
@@ -265,16 +282,16 @@
 
           <!-- 3. LEGADO -->
           <div id="barLegacy" class="bg-indigo-200 h-full flex items-center justify-center border-l border-white/20 transition-all duration-700 overflow-hidden" style="width: 20%">
-            <span class="text-indigo-800/70 text-[10px] font-bold whitespace-nowrap bar-label">LEGADO</span>
+            <span class="text-indigo-800/70 text-[10px] font-bold whitespace-nowrap bar-label-container bar-label">LEGADO</span>
           </div>
         </div>
 
         <!-- Leyenda -->
         <div class="mt-4 flex flex-wrap justify-center gap-3 md:gap-6 text-[10px] md:text-xs text-slate-500 font-medium">
           <div class="flex items-center"><div class="w-3 h-3 bg-slate-500 rounded-sm mr-1.5"></div> Pasado</div>
-          <div class="flex items-center"><div class="w-3 h-3 pattern-bio border border-slate-300 rounded-sm mr-1.5"></div> Mantenimiento (11.5h/día)</div>
+          <div class="flex items-center"><div class="w-3 h-3 pattern-bio border border-slate-300 rounded-sm mr-1.5"></div> Bio (11.5h)</div>
           <div class="flex items-center"><div class="w-3 h-3 pattern-trapped border border-red-300 rounded-sm mr-1.5"></div> Atrapado</div>
-          <div class="flex items-center"><div class="w-3 h-3 bg-emerald-500 rounded-sm mr-1.5 shadow-sm"></div> Tiempo Constructor</div>
+          <div class="flex items-center"><div class="w-3 h-3 bg-emerald-500 rounded-sm mr-1.5 shadow-sm"></div> Tú (Constructor)</div>
         </div>
       </div>
     </section>
@@ -368,13 +385,17 @@
     ];
 
     // Oculta el texto si el segmento es visualmente muy pequeño
+    // NOTA: Se actualiza para buscar .bar-label-container en lugar de un span genérico
     function updateLabelVisibility(element, segmentPctOfLife) {
-      const labelSpan = element.querySelector('span');
-      if (!labelSpan) return;
+      // Buscamos el contenedor específico de la etiqueta
+      const labelContainer = element.querySelector('.bar-label-container');
+      if (!labelContainer) return;
+      
+      // Si el segmento es < 4% del total de la vida (aprox 12px en móvil), ocultamos todo el label
       if (segmentPctOfLife < 4) {
-        labelSpan.classList.add('hide-label');
+        labelContainer.classList.add('hide-label');
       } else {
-        labelSpan.classList.remove('hide-label');
+        labelContainer.classList.remove('hide-label');
       }
     }
 
