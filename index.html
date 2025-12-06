@@ -1,491 +1,486 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⏳</text></svg>">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculadora de Vida con Propósito - Tu Tiempo Efectivo</title>
-  <script src="https://cdn.tailwindcss.com "></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com ">
-  <link rel="preconnect" href="https://fonts.gstatic.com " crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400 ;600;900&display=swap" rel="stylesheet">
+  <title>El Reloj Invisible - Calculadora de Impacto</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⏳</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          },
+          colors: {
+            'brand-dark': '#0f172a',
+            'brand-bio': '#64748b',   
+            'brand-accent': '#10b981', 
+            'brand-trapped': '#ef4444', 
+            'brand-legacy': '#6366f1', 
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
     body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
       min-height: 100vh;
-      color: #1f2937;
     }
     
-    .glass-panel {
-      background: rgba(255, 255, 255, 0.90);
-      backdrop-filter: blur(12px);
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.8);
     }
 
-    /* Patrón para el tiempo atrapado: Zona de "Peligro/Desperdicio" */
-    .trapped-pattern {
-      background-color: #e5e7eb;
-      background-image: repeating-linear-gradient(
+    /* Patrón para Mantenimiento Biológico (Sutil) */
+    .pattern-bio {
+      background-color: #e2e8f0; 
+      background-image: linear-gradient(
         45deg,
-        #9ca3af,
-        #9ca3af 10px,
-        #d1d5db 10px,
-        #d1d5db 20px
+        #cbd5e1 25%, 
+        transparent 25%, 
+        transparent 50%, 
+        #cbd5e1 50%, 
+        #cbd5e1 75%, 
+        transparent 75%, 
+        transparent
+      );
+      background-size: 8px 8px;
+    }
+
+    /* Patrón rayado rojo para el tiempo atrapado */
+    .pattern-trapped {
+      background-color: #fee2e2;
+      background-image: repeating-linear-gradient(
+        135deg,
+        rgba(239, 68, 68, 0.15) 0px,
+        rgba(239, 68, 68, 0.15) 4px,
+        transparent 4px,
+        transparent 8px
       );
     }
-    
-    /* Animación suave para el cambio de números */
-    .animate-number {
-      transition: color 0.5s ease;
+
+    /* Slider personalizado */
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-top: -10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      cursor: pointer;
+      background: #e2e8f0;
+      border-radius: 99px;
     }
 
-    /* Input personalizado para que se vea limpio */
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
+    .fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; transform: translateY(10px); }
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
+    @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+    .number-transition { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    /* Clase para ocultar etiquetas pequeñas */
+    .bar-label {
+      transition: opacity 0.3s ease;
+      opacity: 1;
     }
-    input[type=number] {
-      -moz-appearance: textfield;
+    .hide-label { 
+      opacity: 0 !important; 
+      pointer-events: none; 
     }
   </style>
 </head>
-<body class="flex justify-center p-4 py-8 md:py-12">
+<body class="text-slate-800 antialiased py-6 px-4 flex justify-center items-start">
 
-  <div class="glass-panel rounded-3xl w-full max-w-3xl p-6 md:p-10 border border-white/60 relative overflow-hidden">
+  <main class="w-full max-w-4xl space-y-6">
     
-    <!-- Decoración de fondo sutil -->
-    <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-blue-400 rounded-full blur-3xl opacity-10 pointer-events-none"></div>
-    <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-red-400 rounded-full blur-3xl opacity-10 pointer-events-none"></div>
-
-    <!-- Encabezado -->
-    <div class="text-center mb-8 relative z-10">
-      <h1 class="text-3xl md:text-4xl font-black text-gray-800 tracking-tight mb-2">
-        ⏳ ¿Cuánto Tiempo Tienes Realmente?
+    <!-- HEADER -->
+    <header class="text-center space-y-2 fade-in">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white shadow-sm mb-2 text-2xl">
+        ⏳
+      </div>
+      <h1 class="font-display text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+        El Reloj <span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-600 to-slate-900">Invisible</span>
       </h1>
-      <p class="text-gray-500 text-lg">
-        La verdad matemática sobre el tiempo que te queda para vivir significativamente.
+      <p class="text-slate-600 text-sm md:text-base max-w-xl mx-auto">
+        Calcula tu verdadero <strong>Tiempo Constructor</strong> disponible.
       </p>
-    </div>
+    </header>
 
-    <!-- Panel de Control (Inputs) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 relative z-10">
-      <!-- Entrada Edad -->
-      <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100 transition-all shadow-sm group">
-        <label for="currentAge" class="block text-blue-800 font-bold mb-1 text-sm uppercase tracking-wide">Tu Edad Actual</label>
-        <div class="flex items-baseline">
-          <input type="number" id="currentAge" value="30" min="14" max="60" step="1"
-            class="w-full text-4xl font-black bg-transparent border-b-2 border-blue-200 focus:border-blue-600 outline-none text-blue-900 py-1 transition-colors" placeholder="30">
-          <span class="text-lg text-blue-400 font-semibold ml-2">años</span>
-        </div>
-        
-        <!-- Mensaje de error para la validación de edad -->
-        <p id="ageError" class="text-xs text-red-500 mt-2 font-bold transition-all duration-300 h-0 overflow-hidden opacity-0">
-          <!-- El texto se llena dinámicamente con JS -->
-        </p>
-      </div>
-
-      <!-- Entrada Horas Atrapadas (CON VALIDACIÓN) -->
-      <div class="bg-red-50 p-5 rounded-2xl border border-red-100 transition-all shadow-sm group has-[:invalid]:border-red-500">
-        <label for="trappedHoursDaily" class="block text-red-800 font-bold mb-1 text-sm uppercase tracking-wide">Tiempo "Atrapado" Diario</label>
-        <div class="flex items-baseline">
-          <input type="number" id="trappedHoursDaily" value="9" min="0" max="12.5" step="0.5"
-            class="w-full text-4xl font-black bg-transparent border-b-2 border-red-200 focus:border-red-600 outline-none text-red-900 py-1 transition-colors" 
-            placeholder="0.0">
-          <span class="text-lg text-red-400 font-semibold ml-2">horas/día</span>
-        </div>
-        
-        <!-- Mensaje de error para la validación de 12.5 horas -->
-        <p id="trappedError" class="text-xs text-red-500 mt-2 font-bold transition-all duration-300 h-0 overflow-hidden opacity-0">
-          ❌ ERROR: No puedes tener más de 12.5 horas atrapadas (24h - 11.5h de mantenimiento biológico).
-        </p>
-        
-        <p class="text-xs text-red-500 mt-2 font-medium opacity-80" id="trappedDescription">Redes, TV, tráfico, procrastinación...</p>
-      </div>
-    </div>
-
-    <!-- EL DATO HÉROE (El golpe de realidad) -->
-    <div id="heroSection" class="text-center mb-10 py-8 bg-gradient-to-b from-white to-gray-50 rounded-3xl shadow-sm border border-gray-200 relative z-10">
-      <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Tu verdadero capital disponible</p>
+    <!-- CALCULADORA PRINCIPAL -->
+    <section class="glass-card rounded-3xl p-6 md:p-8 fade-in delay-100 relative overflow-hidden">
       
-      <div class="flex flex-col md:flex-row justify-center items-center md:items-baseline gap-2 md:gap-4">
-        <span id="bigNumber" class="text-8xl md:text-9xl font-black text-gray-800 tracking-tighter leading-none animate-number">0</span>
-        <div class="flex flex-col items-center md:items-start">
-          <span class="text-3xl md:text-4xl font-bold text-gray-700 leading-none">Años</span>
-          <span class="text-sm font-bold text-emerald-600 uppercase tracking-widest mt-1">Efectivos (Hasta 65)</span>
-        </div>
-      </div>
+      <!-- Fondo decorativo -->
+      <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
 
-      <div class="mt-6 inline-flex items-center bg-yellow-50 border border-yellow-100 px-4 py-2 rounded-full mx-auto max-w-md">
-        <span class="text-lg mr-2">ℹ️</span>
-        <p class="text-yellow-800 text-xs text-left leading-tight font-medium">
-          Cálculo basado en tu edad hasta el retiro promedio (65 años). Descontando automáticamente <strong>11.5 horas/día</strong> de mantenimiento biológico (sueño, comida, higiene) + tus horas atrapadas.
-        </p>
-      </div>
-    </div>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 relative z-10">
+        
+        <!-- PANEL DE INPUTS (IZQUIERDA) -->
+        <div class="md:col-span-5 space-y-6">
+          
+          <!-- EDAD (Validado 14-60) -->
+          <div class="bg-white/50 p-4 rounded-2xl border border-white shadow-sm">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+              Tu Edad (14 - 60 años)
+            </label>
+            <div class="flex items-center gap-3">
+              <input type="number" id="ageInput" value="30" min="14" max="60" 
+                class="w-full text-3xl font-display font-bold bg-transparent border-b-2 border-slate-300 focus:border-brand-accent outline-none transition-colors py-1 text-slate-800"
+                placeholder="30">
+              <span class="text-sm font-bold text-slate-400">años</span>
+            </div>
+            <!-- Mensaje de error -->
+            <p id="ageError" class="text-xs text-red-500 mt-2 font-medium hidden">
+              ⚠️ Herramienta diseñada para la etapa activa (14-60 años).
+            </p>
+          </div>
 
-    <!-- Barra Visual -->
-    <div class="mb-6 relative z-10">
-      <div class="flex justify-between text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider px-1">
-        <span>Nacimiento (0)</span>
-        <span>Esperanza de vida (80)</span>
-      </div>
-      
-      <!-- Contenedor de la barra -->
-      <div class="relative w-full h-14 bg-gray-100 rounded-xl overflow-hidden shadow-inner flex ring-1 ring-gray-200">
-        
-        <!-- 1. Pasado (Gris plano) -->
-        <div id="barPast" class="h-full bg-gray-400 flex items-center justify-center relative border-r border-white/30 transition-all duration-500">
-             <span class="text-white text-xs font-bold opacity-50 transform -rotate-90 md:rotate-0">VIVIDO</span>
-        </div>
-        
-        <!-- Contenedor Futuro ACTIVO (de la edad actual a 65) -->
-        <div id="activeFutureContainer" class="h-full flex relative transition-all duration-700 ease-out">
-            <!-- 2. Real (Verde vibrante) -->
-            <div id="barReal" class="h-full bg-gradient-to-r from-emerald-500 to-green-500 shadow-lg relative z-20 transition-all duration-700 ease-out flex items-center justify-center">
-                 <!-- Brillo sutil -->
-                 <div class="absolute inset-0 bg-white opacity-20" style="background-image: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);"></div>
-                 <span class="text-white text-xs font-bold drop-shadow-md hidden md:block z-30">TÚ</span>
+          <!-- TIEMPO ATRAPADO (Slider) -->
+          <div class="bg-white/50 p-4 rounded-2xl border border-white shadow-sm">
+            <div class="flex justify-between items-end mb-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-500">
+                Tiempo Desalineado Diario
+              </label>
+              <button onclick="document.getElementById('modal-trapped').showModal()" class="text-[10px] text-brand-trapped font-bold hover:underline cursor-pointer uppercase tracking-wide">
+                ¿Qué sumar aquí?
+              </button>
+            </div>
+
+            <div class="flex items-end gap-2 mb-3">
+              <span class="text-4xl font-display font-bold text-brand-trapped" id="trappedDisplay">9.0</span>
+              <span class="text-xs font-bold text-slate-400 mb-2">horas/día</span>
             </div>
             
-            <!-- 3. Desperdicio + Bio (Rayado) -->
-            <div id="barTrapped" class="h-full trapped-pattern relative z-10 border-l border-white/20 transition-all duration-700 ease-out flex items-center justify-center">
-                 <span class="text-gray-500 text-xs font-bold opacity-60 hidden md:block bg-white/50 px-1 rounded">RUTINA</span>
+            <input type="range" id="trappedSlider" min="0" max="12.5" step="0.5" value="9" class="w-full accent-red-500 mb-3">
+            
+            <!-- Contexto Corto (Para estabilidad UI) -->
+            <div id="trappedContext" class="text-xs font-medium text-slate-500 bg-slate-100 p-2 rounded border border-slate-200">
+              Trabajo de supervivencia, tráfico...
             </div>
+          </div>
+
         </div>
 
-        <!-- 4. Legacy/Freedom Time (65 to 80) -->
-        <div id="barLegacy" class="h-full bg-indigo-300/50 flex items-center justify-center relative z-0 transition-all duration-500 border-l border-white/20">
-             <span id="legacyText" class="text-indigo-800 text-xs font-bold opacity-80 hidden md:block z-30">LEGADO (65+)</span>
+        <!-- PANEL DE RESULTADO (DERECHA) -->
+        <div class="md:col-span-7 flex flex-col justify-center space-y-4">
+          
+          <!-- Bloque Número Principal -->
+          <div class="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 p-6 text-center shadow-inner relative overflow-hidden group">
+            
+            <span class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-widest mb-4">
+              Tu Capital Real
+            </span>
+
+            <div class="relative inline-block">
+              <span id="resultYears" class="text-8xl md:text-9xl font-display font-black text-slate-800 tracking-tighter number-transition">
+                0.0
+              </span>
+              <p class="text-xl md:text-2xl font-bold text-slate-600 mt-[-10px]">Años Efectivos</p>
+            </div>
+
+            <p class="text-slate-500 text-xs mt-4 max-w-sm mx-auto leading-relaxed">
+              Tiempo limpio disponible hasta los 65 años.
+            </p>
+
+            <!-- Overlay de Bloqueo -->
+            <div id="lockOverlay" class="absolute inset-0 bg-slate-100/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-6 text-center hidden">
+              <span class="text-4xl mb-2">🔒</span>
+              <h3 class="font-bold text-slate-800">Fuera de Rango</h3>
+              <p class="text-sm text-slate-500 mt-1">Ingresa una edad entre 14 y 60 años.</p>
+            </div>
+          </div>
+
+          <!-- NUEVO BLOQUE: DIAGNÓSTICO DE IMPACTO (El golpe emocional) -->
+          <div id="diagnosisBox" class="rounded-xl border p-4 text-left transition-colors duration-500 bg-red-50 border-red-200">
+            <h4 id="diagnosisTitle" class="font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2 text-red-800">
+              <span>🚨</span> Diagnóstico de Pérdida
+            </h4>
+            <p id="diagnosisText" class="text-sm leading-relaxed text-red-900">
+              Calculando...
+            </p>
+          </div>
+
         </div>
       </div>
+
+      <!-- VISUALIZACIÓN DE BARRA DE VIDA -->
+      <div class="mt-10 pt-8 border-t border-slate-100">
+        <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">
+          <span>0 Años</span>
+          <span class="text-center">Vida Activa (Hasta 65)</span>
+          <span>80 Años</span>
+        </div>
+        
+        <!-- Contenedor Barra -->
+        <div class="h-16 w-full bg-slate-200 rounded-lg overflow-hidden flex shadow-inner ring-1 ring-slate-200 relative">
+          
+          <!-- 1. PASADO -->
+          <div id="barPast" class="bg-slate-500 h-full flex items-center justify-center border-r border-white/20 transition-all duration-700 relative overflow-hidden" style="width: 30%">
+            <span class="text-white text-[10px] font-bold px-1 whitespace-nowrap z-10 bar-label">VIVIDO</span>
+          </div>
+
+          <!-- 2. FUTURO ACTIVO -->
+          <div id="barActiveContainer" class="flex h-full transition-all duration-700 bg-white relative" style="width: 50%">
+            
+            <!-- A. Mantenimiento Biológico -->
+            <div id="barBio" class="pattern-bio h-full flex items-center justify-center border-r border-slate-300/50 relative overflow-hidden" style="width: 48%">
+              <span class="text-slate-400 text-[9px] font-bold px-1 rounded transform -rotate-90 md:rotate-0 whitespace-nowrap bar-label">MANTENIMIENTO</span>
+            </div>
+
+            <!-- B. Tiempo Atrapado -->
+            <div id="barTrapped" class="pattern-trapped h-full flex items-center justify-center border-r border-red-100 transition-all duration-300 overflow-hidden" style="width: 30%">
+              <span class="text-red-900 text-[9px] font-bold bg-white/40 px-1 rounded whitespace-nowrap bar-label">ATRAPADO</span>
+            </div>
+
+            <!-- C. Tiempo Constructor -->
+            <div id="barConstructor" class="bg-emerald-500 h-full flex items-center justify-center relative transition-all duration-500 overflow-hidden" style="width: 22%">
+              <span class="text-white text-[10px] font-bold drop-shadow-md z-10 whitespace-nowrap bar-label">TÚ</span>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+            </div>
+
+          </div>
+
+          <!-- 3. LEGADO -->
+          <div id="barLegacy" class="bg-indigo-200 h-full flex items-center justify-center border-l border-white/20 transition-all duration-700 overflow-hidden" style="width: 20%">
+            <span class="text-indigo-800/70 text-[10px] font-bold whitespace-nowrap bar-label">LEGADO</span>
+          </div>
+        </div>
+
+        <!-- Leyenda -->
+        <div class="mt-4 flex flex-wrap justify-center gap-3 md:gap-6 text-[10px] md:text-xs text-slate-500 font-medium">
+          <div class="flex items-center"><div class="w-3 h-3 bg-slate-500 rounded-sm mr-1.5"></div> Pasado</div>
+          <div class="flex items-center"><div class="w-3 h-3 pattern-bio border border-slate-300 rounded-sm mr-1.5"></div> Mantenimiento (11.5h/día)</div>
+          <div class="flex items-center"><div class="w-3 h-3 pattern-trapped border border-red-300 rounded-sm mr-1.5"></div> Atrapado</div>
+          <div class="flex items-center"><div class="w-3 h-3 bg-emerald-500 rounded-sm mr-1.5 shadow-sm"></div> Tiempo Constructor</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN EDUCATIVA -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4 fade-in delay-200">
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+        <h3 class="font-bold text-base text-emerald-700 mb-1">🌱 Tiempo Constructor</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Es la pequeña franja verde. El único momento donde tienes energía para <strong>vivir tu propósito HOY</strong> mientras construyes tu libertad de mañana.
+        </p>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+        <h3 class="font-bold text-base text-slate-600 mb-1">🔒 Mantenimiento Biológico</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          La franja gris clara. Representa sueño (8h), higiene y comida (3.5h). Es el "impuesto biológico" de estar vivo. No es tiempo disponible.
+        </p>
+      </div>
+    </section>
+
+    <!-- CALL TO ACTION -->
+    <footer class="text-center py-6 fade-in delay-300">
+      <div class="inline-block p-1 bg-slate-100 rounded-full mb-4">
+        <span class="px-3 py-1 bg-white rounded-full text-xs font-bold text-slate-600 shadow-sm border border-slate-200">¿Sorprendido por lo poco que queda?</span>
+      </div>
+      <h4 class="text-lg font-bold text-slate-900 mb-4">No dejes que tu franja verde desaparezca.</h4>
       
-      <!-- Leyenda Dinámica -->
-      <div class="flex flex-wrap justify-center gap-4 md:gap-8 mt-4 text-xs md:text-sm font-medium text-gray-600">
-        <div class="flex items-center"><div class="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>Ya vivido</div>
-        <div class="flex items-center"><div class="w-3 h-3 bg-emerald-500 rounded-full mr-2 shadow-sm ring-1 ring-emerald-200"></div>Tiempo Constructor</div>
-        <div class="flex items-center"><div class="w-3 h-3 trapped-pattern rounded-full mr-2 border border-gray-400"></div>Tiempo Atrapado</div>
-        <div class="flex items-center"><div class="w-3 h-3 bg-indigo-300/50 rounded-full mr-2 border border-indigo-500/30"></div>Tiempo de Legado (65+)</div>
-      </div>
-    </div>
+      <a href="#" class="inline-flex items-center justify-center bg-slate-900 text-white px-8 py-3 rounded-full font-bold text-sm hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 group">
+        <span>Conseguir el Libro "El Reloj Invisible"</span>
+        <span class="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+      </a>
+      <p class="text-[10px] text-slate-400 mt-4">Campaña de concientización sobre el Tiempo Constructor.</p>
+    </footer>
 
-    <!-- Mensaje Contextual (El análisis emocional) -->
-    <div id="dynamicMessage" class="mt-8 p-6 rounded-2xl bg-indigo-50 border border-indigo-100 text-center relative z-10 transition-all duration-300">
-      <h3 class="text-lg font-bold text-indigo-900 mb-2 flex justify-center items-center">
-        <span class="mr-2">💡</span> Diagnóstico
-      </h3>
-      <p id="analysisText" class="text-indigo-800 text-base md:text-lg leading-relaxed">
-        Calculando tu impacto...
+  </main>
+
+  <!-- MODAL AYUDA -->
+  <dialog id="modal-trapped" class="p-0 rounded-2xl shadow-2xl backdrop:bg-slate-900/40 max-w-sm w-full m-auto">
+    <div class="bg-white p-5">
+      <h3 class="font-bold text-slate-800 text-lg mb-2">¿Qué es Tiempo Desalineado?</h3>
+      <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+        Son horas conscientes que no construyen nada para ti.
       </p>
+      <ul class="space-y-2 text-sm text-slate-600 mb-6 bg-slate-50 p-3 rounded-lg">
+        <li class="flex gap-2">❌ <span>Trabajo que odias y no te enseña nada.</span></li>
+        <li class="flex gap-2">❌ <span>Tráfico excesivo.</span></li>
+        <li class="flex gap-2">❌ <span>Redes sociales por aburrimiento.</span></li>
+      </ul>
+      <form method="dialog">
+        <button class="w-full bg-slate-100 text-slate-800 font-bold py-2 rounded-xl hover:bg-slate-200 transition">Entendido</button>
+      </form>
     </div>
-
-  </div>
+  </dialog>
 
   <script>
-    // --- CONSTANTES ---
-    const LIFE_EXPECTANCY = 80; // Límite visual de la barra de vida
-    const RETIREMENT_AGE = 65; // Nuevo límite para el cálculo de "Años Efectivos"
-    const BIOLOGICAL_MAINTENANCE = 11.5; // El "impuesto biológico" fijo
-    const MAX_TRAPPED_HOURS = 24 - BIOLOGICAL_MAINTENANCE; // 12.5 horas
-    const MAX_AGE = 60; // Edad máxima permitida
-    const MIN_AGE = 14; // NUEVO: Edad mínima permitida
+    // --- CONFIGURACIÓN ---
+    const LIFE_EXPECTANCY = 80;
+    const RETIREMENT_AGE = 65;
+    const TOTAL_HOURS = 24;
+    const BIO_MAINTENANCE_HOURS = 11.5; 
 
-    // --- REFERENCIAS DOM ---
-    const ageInput = document.getElementById('currentAge');
-    const trappedInput = document.getElementById('trappedHoursDaily');
-    const ageErrorEl = document.getElementById('ageError'); // Referencia al error de edad
-    const trappedErrorEl = document.getElementById('trappedError'); // Referencia al error
-    const trappedDescriptionEl = document.getElementById('trappedDescription'); // Referencia a la descripción
-    const bigNumberEl = document.getElementById('bigNumber');
-    const analysisTextEl = document.getElementById('analysisText');
-    const barPastEl = document.getElementById('barPast');
-    const activeFutureContainerEl = document.getElementById('activeFutureContainer');
-    const barRealEl = document.getElementById('barReal');
-    const barTrappedEl = document.getElementById('barTrapped');
-    const barLegacyEl = document.getElementById('barLegacy');
-    const messageBoxEl = document.getElementById('dynamicMessage');
-    const legacyTextEl = document.getElementById('legacyText');
+    // Elementos DOM
+    const ageInput = document.getElementById('ageInput');
+    const ageError = document.getElementById('ageError');
+    const trappedSlider = document.getElementById('trappedSlider');
+    const trappedDisplay = document.getElementById('trappedDisplay');
+    const trappedContext = document.getElementById('trappedContext');
+    const resultYears = document.getElementById('resultYears');
+    const lockOverlay = document.getElementById('lockOverlay');
     
-    // Estado de la validación
-    let isTrappedInputValid = true;
-    let isAgeInputValid = true; // Nuevo: Estado para validación de edad
+    // Elementos Diagnóstico
+    const diagnosisBox = document.getElementById('diagnosisBox');
+    const diagnosisTitle = document.getElementById('diagnosisTitle');
+    const diagnosisText = document.getElementById('diagnosisText');
 
-    // --- FUNCIONES DE VALIDACIÓN ---
+    // Elementos Barras
+    const barPast = document.getElementById('barPast');
+    const barActiveContainer = document.getElementById('barActiveContainer');
+    const barBio = document.getElementById('barBio');
+    const barTrapped = document.getElementById('barTrapped');
+    const barConstructor = document.getElementById('barConstructor');
+    const barLegacy = document.getElementById('barLegacy');
 
-    // Validación para el campo de edad
-    function validateCurrentAge() {
-      let currentAge = parseFloat(ageInput.value);
-      
-      // Limpiar estados previos
-      ageErrorEl.style.height = '0';
-      ageErrorEl.style.opacity = '0';
-      ageInput.classList.remove('border-red-500', 'focus:border-red-700');
-      ageInput.classList.add('focus:border-blue-600');
-      isAgeInputValid = true;
+    // Mensajes Cortos para el Slider (UI Estable)
+    const shortContextMessages = [
+      { max: 2, text: "🌟 Gestión Excelente" },
+      { max: 5, text: "⚖️ Balance Promedio" },
+      { max: 9, text: "⚠️ Zona de Peligro" },
+      { max: 13, text: "🚨 Estado Crítico" }
+    ];
 
-      // Si el campo está vacío o no es número, no validamos aún (o se trata como 0 abajo)
-      if (isNaN(currentAge)) return;
-
-      // VALIDACIÓN: Menor de 14 años
-      if (currentAge < MIN_AGE) {
-        ageErrorEl.textContent = "❌ ERROR: La edad mínima permitida es 14 años.";
-        showAgeError();
-        isAgeInputValid = false;
-      } 
-      // VALIDACIÓN: Mayor de 60 años
-      else if (currentAge > MAX_AGE) {
-        ageErrorEl.textContent = "❌ ERROR: La edad máxima permitida es 60 años para este cálculo.";
-        showAgeError();
-        isAgeInputValid = false;
-      }
-    }
-
-    // Función auxiliar para mostrar visualmente el error de edad
-    function showAgeError() {
-      ageErrorEl.style.height = 'auto';
-      ageErrorEl.style.opacity = '1';
-      ageInput.classList.add('border-red-500', 'focus:border-red-700');
-      ageInput.classList.remove('focus:border-blue-600');
-    }
-
-    function validateTrappedHours() {
-      let trappedDaily = parseFloat(trappedInput.value);
-
-      // Si es un número válido y es mayor que el máximo permitido
-      if (!isNaN(trappedDaily) && trappedDaily > MAX_TRAPPED_HOURS) {
-        // Mostrar error
-        trappedErrorEl.style.height = 'auto';
-        trappedErrorEl.style.opacity = '1';
-        trappedDescriptionEl.classList.add('hidden');
-        trappedInput.classList.add('border-red-500', 'focus:border-red-700');
-        trappedInput.classList.remove('focus:border-red-600');
-        isTrappedInputValid = false;
+    // Oculta el texto si el segmento es visualmente muy pequeño
+    function updateLabelVisibility(element, segmentPctOfLife) {
+      const labelSpan = element.querySelector('span');
+      if (!labelSpan) return;
+      if (segmentPctOfLife < 4) {
+        labelSpan.classList.add('hide-label');
       } else {
-        // Ocultar error
-        trappedErrorEl.style.height = '0';
-        trappedErrorEl.style.opacity = '0';
-        trappedDescriptionEl.classList.remove('hidden');
-        trappedInput.classList.remove('border-red-500', 'focus:border-red-700');
-        trappedInput.classList.add('focus:border-red-600');
-        isTrappedInputValid = true;
+        labelSpan.classList.remove('hide-label');
       }
     }
 
     function calculate() {
-      // 1. Validar primero antes de proceder con la lógica
-      validateCurrentAge(); 
-      validateTrappedHours();
-
-      // Si la validación falla, detenemos el cálculo y mostramos mensaje apropiado
-      if (!isAgeInputValid || !isTrappedInputValid) {
-        if (!isAgeInputValid) {
-          bigNumberEl.innerText = 'N/A';
-          analysisTextEl.innerHTML = 'Por favor, verifica el campo "Tu Edad Actual". El análisis está diseñado para personas entre 14 y 60 años.<br><br>Si tu edad es significativamente menor o mayor, es posible que el ejercicio no genere el impacto deseado o que los consejos no se ajusten a tu etapa de vida. Siéntete libre de continuar, pero ten en cuenta este contexto.';
-        } else if (!isTrappedInputValid) {
-          bigNumberEl.innerText = 'N/A';
-          analysisTextEl.innerHTML = 'Por favor, corrige el error en el campo "Tiempo Atrapado" para ver el cálculo.';
-        }
-        return;
+      let age = parseInt(ageInput.value);
+      let trappedDaily = parseFloat(trappedSlider.value);
+      
+      // Validación Estricta
+      if (isNaN(age) || age < 14 || age > 60) {
+        ageError.classList.remove('hidden');
+        lockOverlay.classList.remove('hidden');
+        ageInput.classList.add('text-red-500');
+        return; 
+      } else {
+        ageError.classList.add('hidden');
+        lockOverlay.classList.add('hidden');
+        ageInput.classList.remove('text-red-500');
       }
-      
-      // 2. Obtener y Limpiar Valores
-      let age = parseFloat(ageInput.value);
-      let trappedDaily = parseFloat(trappedInput.value);
 
-      // Valores por defecto seguros si el campo está vacío
-      if (isNaN(age)) age = 0;
-      if (isNaN(trappedDaily)) trappedDaily = 0;
-
-      // Límites duros para evitar romper la lógica visual (aunque la validación ya nos protege)
-      if (age > 79) age = 79;
-      if (age < 0) age = 0;
-      if (trappedDaily < 0) trappedDaily = 0;
-
-      // 3. Lógica Matemática
-      
-      // Años restantes hasta el retiro (65 años)
+      // --- 1. LÓGICA MATEMÁTICA ---
       const yearsUntilRetirement = Math.max(0, RETIREMENT_AGE - age);
       
-      // Horas Efectivas = 24 - (Bio + Atrapado)
-      const effectiveHoursDaily = 24 - BIOLOGICAL_MAINTENANCE - trappedDaily;
-      
-      // Factor de Efectividad = Horas Útiles / 24
-      const effectivenessFactor = effectiveHoursDaily / 24;
-      
-      // Años Reales = Años Restantes HASTA 65 * Factor
-      const realEffectiveYears = yearsUntilRetirement * effectivenessFactor;
-      
-      // Pérdida por horas atrapadas (Solo hasta 65)
-      const trappedFactor = trappedDaily / 24;
-      const yearsLostToTrap = yearsUntilRetirement * trappedFactor;
+      // Años Perdidos por "Tiempo Atrapado" (La matemática dolorosa)
+      // Fórmula: AñosRestantes * (HorasAtrapadas / 24)
+      const trappedRatio = trappedDaily / TOTAL_HOURS;
+      const lostYears = yearsUntilRetirement * trappedRatio;
 
-      // 4. Actualizar UI
-      updateVisuals(age, yearsUntilRetirement, realEffectiveYears, yearsLostToTrap, trappedDaily);
+      // Horas Constructoras y Años Efectivos
+      let constructorHours = Math.max(0, TOTAL_HOURS - BIO_MAINTENANCE_HOURS - trappedDaily);
+      if (constructorHours < 0.05) constructorHours = 0;
+      const efficiencyFactor = constructorHours / TOTAL_HOURS;
+      const effectiveYears = yearsUntilRetirement * efficiencyFactor;
+      
+      resultYears.innerText = effectiveYears.toFixed(1);
+
+      // --- 2. ACTUALIZACIÓN UI SLIDER (Contexto Corto) ---
+      trappedDisplay.innerText = trappedDaily.toFixed(1);
+      const shortMsg = shortContextMessages.find(m => trappedDaily <= m.max) || shortContextMessages[shortContextMessages.length - 1];
+      trappedContext.innerText = shortMsg.text;
+
+      // --- 3. ACTUALIZACIÓN DIAGNÓSTICO (El Golpe Emocional) ---
+      if (trappedDaily <= 2) {
+        // Verde
+        diagnosisBox.className = "rounded-xl border p-4 text-left transition-colors duration-500 bg-emerald-50 border-emerald-200";
+        diagnosisTitle.className = "font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2 text-emerald-800";
+        diagnosisTitle.innerHTML = "<span>✅</span> Diagnóstico: Excelente";
+        diagnosisText.innerHTML = `Solo cedes <strong>${lostYears.toFixed(1)} años</strong> al entorno. Tu franja verde es poderosa. Sigue así, estás construyendo libertad real.`;
+        diagnosisText.className = "text-sm leading-relaxed text-emerald-900";
+      
+      } else if (trappedDaily <= 5) {
+        // Naranja
+        diagnosisBox.className = "rounded-xl border p-4 text-left transition-colors duration-500 bg-orange-50 border-orange-200";
+        diagnosisTitle.className = "font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2 text-orange-800";
+        diagnosisTitle.innerHTML = "<span>⚠️</span> Precaución";
+        diagnosisText.innerHTML = `Cuidado. Esas <strong>${trappedDaily} horas diarias</strong> se acumulan. Estás dejando ir <strong>${lostYears.toFixed(1)} años</strong> que podrías usar para construir tu libertad.`;
+        diagnosisText.className = "text-sm leading-relaxed text-orange-900";
+
+      } else {
+        // Rojo (Texto Original Recuperado)
+        diagnosisBox.className = "rounded-xl border p-4 text-left transition-colors duration-500 bg-red-50 border-red-200";
+        diagnosisTitle.className = "font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2 text-red-800";
+        diagnosisTitle.innerHTML = "<span>🚨</span> Alerta de Impacto";
+        diagnosisText.innerHTML = `¡Alerta! Tus <strong>${trappedDaily} horas diarias</strong> de tiempo no alineado están eliminando <strong>${lostYears.toFixed(1)} años completos</strong> de tu etapa activa.<br><br><span class="font-bold">Tienes un enorme potencial, pero lo estás sacrificando. ¿Vale la pena ese intercambio?</span>`;
+        diagnosisText.className = "text-sm leading-relaxed text-red-900";
+      }
+
+      // --- 4. ACTUALIZACIÓN BARRAS ---
+      // Porcentajes Internos
+      const bioPctInternal = (BIO_MAINTENANCE_HOURS / TOTAL_HOURS) * 100;
+      const trappedPctInternal = (trappedDaily / TOTAL_HOURS) * 100;
+      let constructorPctInternal = 0;
+      if (constructorHours > 0) {
+         constructorPctInternal = 100 - bioPctInternal - trappedPctInternal;
+      }
+      
+      // Porcentajes Absolutos
+      const pastPctAbsolute = (age / LIFE_EXPECTANCY) * 100;
+      const activeContainerPctAbsolute = (yearsUntilRetirement / LIFE_EXPECTANCY) * 100;
+      const legacyPctAbsolute = ((LIFE_EXPECTANCY - RETIREMENT_AGE) / LIFE_EXPECTANCY) * 100;
+
+      const bioPctAbsolute = activeContainerPctAbsolute * (bioPctInternal / 100);
+      const trappedPctAbsolute = activeContainerPctAbsolute * (trappedPctInternal / 100);
+      const constructorPctAbsolute = activeContainerPctAbsolute * (constructorPctInternal / 100);
+
+      // Aplicar CSS
+      barPast.style.width = `${pastPctAbsolute}%`;
+      barActiveContainer.style.width = `${activeContainerPctAbsolute}%`;
+      barLegacy.style.width = `${legacyPctAbsolute}%`;
+
+      barBio.style.width = `${bioPctInternal}%`;
+      barTrapped.style.width = `${trappedPctInternal}%`;
+      barConstructor.style.width = `${constructorPctInternal}%`;
+
+      // Labels
+      updateLabelVisibility(barPast, pastPctAbsolute);
+      updateLabelVisibility(barBio, bioPctAbsolute);
+      updateLabelVisibility(barTrapped, trappedPctAbsolute);
+      updateLabelVisibility(barConstructor, constructorPctAbsolute);
+      updateLabelVisibility(barLegacy, legacyPctAbsolute);
     }
 
-    function updateVisuals(age, yearsUntilRetirement, effectiveYears, trappedYearsLost, dailyTrappedHours) {
-      // --- A. BARRA DE PROGRESO (Todo está basado en el 100% que es 80 años) ---
-      
-      // 1. Ancho del Pasado (Gris)
-      const pastPct = (age / LIFE_EXPECTANCY) * 100;
-      barPastEl.style.width = `${pastPct}%`;
+    ageInput.addEventListener('input', calculate);
+    trappedSlider.addEventListener('input', calculate);
 
-      // 2. Ancho del Futuro Activo (De la edad actual a 65)
-      let activeFutureDuration = Math.max(0, RETIREMENT_AGE - age);
-      let activeFuturePct = (activeFutureDuration / LIFE_EXPECTANCY) * 100;
-      activeFutureContainerEl.style.width = `${activeFuturePct}%`;
-      activeFutureContainerEl.style.display = activeFuturePct > 0 ? 'flex' : 'none';
-
-      // 3. Ancho del Legado (De 65 a 80)
-      let legacyDuration = Math.max(0, LIFE_EXPECTANCY - Math.max(age, RETIREMENT_AGE));
-      
-      const legacyPct = (legacyDuration / LIFE_EXPECTANCY) * 100;
-      barLegacyEl.style.width = `${legacyPct}%`;
-      barLegacyEl.style.display = legacyPct > 0 ? 'flex' : 'none';
-
-      // FIX: Ocultar el texto de "LEGADO" si la barra es demasiado estrecha para evitar desbordamiento.
-      if (legacyTextEl) {
-        if (legacyPct < 10 && age < LIFE_EXPECTANCY) {
-            legacyTextEl.classList.add('hidden');
-        } else {
-            legacyTextEl.classList.remove('hidden');
-        }
-      }
-
-      // --- FIX NUEVO: Ocultar textos de PROPÓSITO y RUTINA si la franja Activa es muy estrecha (Evita solapamiento) ---
-      const purposeTextEl = barRealEl.querySelector('span');
-      const routineTextEl = barTrappedEl.querySelector('span');
-
-      if (activeFuturePct < 15 && age < RETIREMENT_AGE) {
-          purposeTextEl.classList.remove('md:block');
-          routineTextEl.classList.remove('md:block');
-      } else {
-          purposeTextEl.classList.add('md:block');
-          routineTextEl.classList.add('md:block');
-      }
-
-
-      // --- 4. Ancho Real (Verde) y Atrapado (Rayado) DENTRO del Contenedor Activo ---
-      let realPctInActiveFuture = 0;
-      if (yearsUntilRetirement > 0) {
-        realPctInActiveFuture = (effectiveYears / yearsUntilRetirement) * 100;
-      }
-      
-      barRealEl.style.width = `${realPctInActiveFuture}%`;
-      barTrappedEl.style.width = `${100 - realPctInActiveFuture}%`;
-
-
-      // --- B. NÚMERO HÉROE ---
-      bigNumberEl.innerText = effectiveYears.toFixed(1);
-      
-      // Asignación de clases y colores
-      let colorClass;
-      let messageBgClass;
-      let messageH3Class;
-      let messagePClass;
-
-      if (effectiveYears < 5 && age < RETIREMENT_AGE) { // Solo si estás en edad activa
-        colorClass = "text-red-600";
-        messageBgClass = "bg-red-50 border border-red-100";
-        messageH3Class = "text-lg font-bold text-red-900 mb-2 flex justify-center items-center";
-        messagePClass = "text-red-800 text-base md:text-lg leading-relaxed";
-      } else if (effectiveYears < 15 && age < RETIREMENT_AGE) { // Solo si estás en edad activa
-        colorClass = "text-orange-500";
-        messageBgClass = "bg-orange-50 border border-orange-100";
-        messageH3Class = "text-lg font-bold text-orange-900 mb-2 flex justify-center items-center";
-        messagePClass = "text-orange-900 text-base md:text-lg leading-relaxed";
-      } else {
-        colorClass = "text-emerald-600";
-        messageBgClass = "bg-emerald-50 border border-emerald-100";
-        messageH3Class = "text-lg font-bold text-emerald-900 mb-2 flex justify-center items-center";
-        messagePClass = "text-emerald-900 text-base md:text-lg leading-relaxed";
-        
-        // Excepción de color para 65+ (se mantiene gris/azul para coherencia)
-        if (age >= RETIREMENT_AGE) {
-            colorClass = "text-gray-800";
-            messageBgClass = "bg-indigo-50 border border-indigo-100";
-            messageH3Class = "text-lg font-bold text-indigo-900 mb-2 flex justify-center items-center";
-            messagePClass = "text-indigo-800 text-base md:text-lg leading-relaxed";
-        }
-      }
-
-      bigNumberEl.className = `text-8xl md:text-9xl font-black ${colorClass} tracking-tighter leading-none animate-number`;
-      messageBoxEl.className = `mt-8 p-6 rounded-2xl ${messageBgClass} text-center relative z-10 transition-all duration-300`;
-      messageBoxEl.querySelector('h3').className = messageH3Class;
-      analysisTextEl.className = messagePClass;
-
-      // --- C. TEXTO DE ANÁLISIS ---
-      generateAnalysisText(effectiveYears, trappedYearsLost, dailyTrappedHours, age);
-    }
-
-    function generateAnalysisText(effective, lostYears, dailyHours, age) {
-      let lifeStage = "";
-      
-      // 1. Determinar etapa de vida y generar mensaje
-      if (age < 18) {
-        lifeStage = "Etapa de Fundamentos (0 - 17)";
-        analysisTextEl.innerHTML = `
-          <strong>Tu Fase Actual:</strong> ${lifeStage}<br>
-          Tus <strong>${effective.toFixed(1)} años efectivos hasta el retiro</strong> son tu motivación. Ahora, tu misión es adquirir las herramientas y disciplina para maximizar tu impacto futuro.
-          <br><span class="font-bold mt-2 block">¡El tiempo que construyes ahora es la base de tu libertad!</span>
-        `;
-      } else if (age < RETIREMENT_AGE) {
-        // Fase Activa (18 - 64)
-        lifeStage = age < 40 ? "Etapa de Construcción (18 - 39)" : "Etapa de Maestría (40 - 64)";
-        
-        if (dailyHours > 2) {
-          // Mensaje de Advertencia
-          analysisTextEl.innerHTML = `
-            <strong>Tu Fase Actual:</strong> ${lifeStage}<br>
-            ¡Alerta! Tus <strong>${dailyHours} horas</strong> diarias de tiempo no alineado 
-            están eliminando <strong>${lostYears.toFixed(1)} años completos</strong> de tu etapa activa.
-            <br><span class="font-bold mt-2 block">Tienes un enorme potencial, pero lo estás sacrificando. ¿Vale la pena ese intercambio?</span>
-          `;
-        } else {
-          // Mensaje de Eficiencia
-          analysisTextEl.innerHTML = `
-            <strong>Tu Fase Actual:</strong> ${lifeStage}<br>
-            Tus <strong>${effective.toFixed(1)} años reales</strong> de Propósito Activo restantes son tu capital. 
-            <br>¡Excelente gestión! Usa este tiempo para construir el futuro que deseas.
-            <br><span class="font-bold mt-2 block">¡Úsalo para crear tu legado!</span>
-          `;
-        }
-      } else if (age < LIFE_EXPECTANCY) {
-        // Fase de Legado (65 - 79) - Aquí es donde se cambia el mensaje
-        lifeStage = "Etapa de Legado y Libertad (65+)";
-        analysisTextEl.innerHTML = `
-          <strong>Tu Fase Actual:</strong> ${lifeStage}<br>
-          Has completado la etapa de <strong>Propósito Activo (hasta 65)</strong>. Tu cálculo de años efectivos es **${effective.toFixed(1)}**.
-          <br>Te quedan aproximadamente <strong>${LIFE_EXPECTANCY - age} años</strong> hasta el horizonte de visualización (80). 
-          <br><span class="font-bold mt-2 block">Este es tu tiempo para la sabiduría aplicada, el disfrute y la trascendencia.</span>
-        `;
-      } else {
-        // Más de 80 años
-          analysisTextEl.innerHTML = `
-          Según el horizonte de visualización (80), estás en un tiempo extra, un bono.
-          <br><span class="font-bold mt-2 block">Cada momento es un regalo. ¡Vive al máximo!</span>
-        `;
-      }
-    }
-
-    // Listeners
-    [ageInput, trappedInput].forEach(input => {
-      // Usamos 'input' para una validación en tiempo real y 'change' para asegurar la ejecución al salir del campo.
-      input.addEventListener('input', calculate);
-      input.addEventListener('change', calculate); 
-    });
-
-    // Iniciar
     calculate();
 
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
