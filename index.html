@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO & Social Media (Open Graph) -->
+  <title>El Reloj Invisible - Calculadora de Impacto</title>
+  <meta name="description" content="Calcula tu verdadero Tiempo Constructor disponible según la metodología Life Crafting™.">
+  
+  <!-- Facebook / WhatsApp / LinkedIn -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://robertoleon.mx/reloj-invisible">
+  <meta property="og:title" content="El Reloj Invisible - Calculadora de Impacto">
+  <meta property="og:description" content="¿Cuánto tiempo te queda realmente para construir tu propósito? Descúbrelo con esta calculadora.">
+  <!-- He usado una imagen de alta resolución que representa el tiempo/reloj de arena -->
+  <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3563/3563395.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="El Reloj Invisible - Calculadora de Impacto">
+  <meta property="twitter:description" content="Calcula tu capital de tiempo real y tu ventana de impacto de vida.">
+  <meta property="twitter:image" content="https://cdn-icons-png.flaticon.com/512/3563/3563395.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3563/3563395.png">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          },
+          colors: {
+            'brand-dark': '#0f172a',
+            'brand-bio': '#64748b',   
+            'brand-accent': '#10b981', 
+            'brand-trapped': '#ef4444', 
+            'brand-legacy': '#6366f1', 
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      min-height: 100vh;
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .pattern-bio {
+      background-color: #f1f5f9; 
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 6px 6px;
+    }
+
+    .pattern-trapped {
+      background-color: #fee2e2;
+      background-image: repeating-linear-gradient(
+        45deg,
+        rgba(239, 68, 68, 0.1) 0px,
+        rgba(239, 68, 68, 0.1) 2px,
+        transparent 2px,
+        transparent 8px
+      );
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-top: -9px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.1s;
+      border: 2px solid white;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 8px;
+      cursor: pointer;
+      background: #e2e8f0;
+      border-radius: 99px;
+    }
+
+    .fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; transform: translateY(10px); }
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
+    @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+    
+    .number-transition { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    
+    .bar-label {
+      transition: opacity 0.3s ease;
+      opacity: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis; 
+      max-width: 90%;
+      display: inline-block;
+    }
+    .hide-label { 
+      opacity: 0 !important; 
+      pointer-events: none; 
+    }
+
+    @keyframes subtlePulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.85; }
+      100% { opacity: 1; }
+    }
+    .pulse-constructor {
+      animation: subtlePulse 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased py-6 px-4 flex justify-center items-start">
+
+  <main class="w-full max-w-4xl space-y-6">
+    
+    <!-- HEADER -->
+    <header class="text-center space-y-2 fade-in">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-md mb-2 p-2">
+        <img src="https://cdn-icons-png.flaticon.com/512/3563/3563395.png" alt="Icono Tiempo" class="w-full h-full object-contain">
+      </div>
+      <h1 class="font-display text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+        El Reloj <span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-600 to-slate-900">Invisible</span>
+      </h1>
+      <p class="text-slate-600 text-sm md:text-base max-w-xl mx-auto">
+        Calcula tu verdadero <strong>Tiempo Constructor</strong> disponible según la metodología Life Crafting™.
+      </p>
+    </header>
+
+    <!-- CALCULADORA PRINCIPAL -->
+    <section class="glass-card rounded-3xl p-6 md:p-8 fade-in delay-100 relative overflow-hidden">
+      
+      <!-- Fondos decorativos -->
+      <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 relative z-10">
+        
+        <!-- PANEL DE INPUTS (IZQUIERDA) -->
+        <div class="md:col-span-5 space-y-6">
+          
+          <!-- EDAD -->
+          <div class="bg-white/50 p-5 rounded-2xl border border-white shadow-sm hover:shadow-md transition-shadow">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+              Tu Edad Actual (14 - 60 años)
+            </label>
+            <div class="flex items-center gap-3">
+              <input type="number" id="ageInput" value="35" min="14" max="60" 
+                class="w-full text-3xl font-display font-bold bg-transparent border-b-2 border-slate-200 focus:border-slate-900 outline-none transition-colors py-1 text-slate-800"
+                placeholder="35">
+              <span class="text-sm font-bold text-slate-400">años</span>
+            </div>
+            <p id="ageError" class="text-[10px] text-red-500 mt-2 font-medium hidden">
+              ⚠️ Rango fuera de foco. La urgencia constructora se mide mejor entre los 14 y 60 años.
+            </p>
+          </div>
+
+          <!-- TIEMPO ATRAPADO -->
+          <div class="bg-white/50 p-5 rounded-2xl border border-white shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex justify-between items-end mb-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-500">
+                Tiempo Desalineado Diario
+              </label>
+              <button onclick="document.getElementById('modal-trapped').showModal()" class="text-[10px] text-brand-trapped font-bold hover:underline cursor-pointer uppercase tracking-wide">
+                ¿Qué es esto?
+              </button>
+            </div>
+
+            <div class="flex items-end gap-2 mb-3">
+              <span class="text-4xl font-display font-bold text-brand-trapped" id="trappedDisplay">8.0</span>
+              <span class="text-xs font-bold text-slate-400 mb-2">horas/día</span>
+            </div>
+            
+            <input type="range" id="trappedSlider" min="0" max="12.5" step="0.5" value="8" class="w-full accent-red-500 mb-3">
+            
+            <div id="trappedContext" class="text-[11px] font-medium text-slate-500 bg-slate-100/80 px-3 py-2 rounded-lg border border-slate-200">
+              Cargando...
+            </div>
+          </div>
+
+        </div>
+
+        <!-- PANEL DE RESULTADO (DERECHA) -->
+        <div class="md:col-span-7 flex flex-col justify-center space-y-4">
+          
+          <div class="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-200 p-8 text-center shadow-inner relative overflow-hidden group">
+            
+            <span class="inline-block px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-widest mb-6">
+              Capital de Tiempo Real
+            </span>
+
+            <div class="relative inline-block mb-2">
+              <span id="resultYears" class="text-8xl md:text-9xl font-display font-black text-slate-900 tracking-tighter number-transition">
+                0.0
+              </span>
+              <p class="text-xl md:text-2xl font-bold text-slate-500 mt-[-8px]">Años Efectivos</p>
+            </div>
+
+            <p class="text-slate-400 text-[11px] mt-6 max-w-sm mx-auto leading-relaxed">
+              Esta es tu ventana de impacto real antes de los 65 años, descontando lo que usas para sobrevivir y lo que pierdes en el entorno.
+            </p>
+
+            <div id="lockOverlay" class="absolute inset-0 bg-slate-100/95 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-6 text-center hidden">
+              <span class="text-4xl mb-3">🔒</span>
+              <h3 class="font-bold text-slate-800">Cálculo en Pausa</h3>
+              <p class="text-sm text-slate-500 mt-1">Por favor, ajusta tu edad a una etapa de construcción (14-60).</p>
+            </div>
+          </div>
+
+          <!-- DIAGNÓSTICO -->
+          <div id="diagnosisBox" class="rounded-2xl border p-5 text-left transition-all duration-500 shadow-sm">
+            <h4 id="diagnosisTitle" class="font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span>🚨</span> DIAGNÓSTICO DE IMPACTO
+            </h4>
+            <p id="diagnosisText" class="text-sm leading-relaxed">
+              Calculando tu situación actual...
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- VISUALIZACIÓN DE BARRA DE VIDA -->
+      <div class="mt-12 pt-8 border-t border-slate-100">
+        <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 px-1">
+          <span>Nacimiento (0)</span>
+          <span class="text-slate-300">Esperanza de Vida (80)</span>
+        </div>
+        
+        <div class="h-20 w-full bg-slate-100 rounded-2xl overflow-hidden flex shadow-inner ring-4 ring-slate-50 relative">
+          
+          <!-- 1. PASADO -->
+          <div id="barPast" class="bg-slate-400 h-full flex items-center justify-center border-r border-white/20 transition-all duration-700 relative overflow-hidden">
+            <span class="text-white text-[10px] font-bold px-2 bar-label">VIVIDO</span>
+            <div class="absolute inset-0 bg-black/5"></div>
+          </div>
+
+          <!-- 2. VENTANA ACTIVA -->
+          <div id="barActiveContainer" class="flex h-full transition-all duration-700 bg-white relative">
+            <div id="barBio" class="pattern-bio h-full flex items-center justify-center border-r border-slate-200 relative overflow-hidden">
+              <span class="bar-label text-slate-500 text-[9px] font-bold px-1 text-center bg-white/60 rounded">
+                  <span class="md:hidden">BASE</span>
+                  <span class="hidden md:inline">BÁSICO</span>
+              </span>
+            </div>
+            <div id="barTrapped" class="pattern-trapped h-full flex items-center justify-center border-r border-red-100 transition-all duration-300 overflow-hidden">
+              <span class="bar-label text-red-900 text-[9px] font-bold bg-white/70 px-1 rounded shadow-sm text-center">
+                   <span class="md:hidden">FUGA</span>
+                   <span class="hidden md:inline">DESALINEADO</span>
+              </span>
+            </div>
+            <div id="barConstructor" class="bg-emerald-500 h-full flex items-center justify-center relative transition-all duration-500 overflow-hidden pulse-constructor">
+              <span class="text-white text-[11px] font-black drop-shadow-md z-10 bar-label">TÚ</span>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            </div>
+          </div>
+
+          <!-- 3. LEGADO -->
+          <div id="barLegacy" class="bg-slate-200 h-full flex items-center justify-center border-l border-white/20 transition-all duration-700 overflow-hidden">
+            <span class="text-slate-400 text-[10px] font-bold bar-label">LEGADO</span>
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-wrap justify-center gap-4 md:gap-8 text-[11px] text-slate-500 font-semibold">
+          <div class="flex items-center"><div class="w-4 h-4 pattern-bio border border-slate-300 rounded-md mr-2"></div> Tiempo Básico</div>
+          <div class="flex items-center"><div class="w-4 h-4 pattern-trapped border border-red-200 rounded-md mr-2"></div> Tiempo Desalineado</div>
+          <div class="flex items-center"><div class="w-4 h-4 bg-emerald-500 rounded-md mr-2 shadow-sm"></div> Tiempo Constructor (Tú)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INFO EXTRA -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4 fade-in delay-200">
+      <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+        <h3 class="font-bold text-emerald-700 mb-2 flex items-center gap-2">
+          <span class="text-xl">🌱</span> ¿Qué es el Tiempo Constructor?
+        </h3>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Es tu franja de máxima potencia. El tiempo donde no solo "estás", sino que <strong>creas</strong>. Es el capital que inviertes en tu propósito para que en el futuro no dependas de cambiar horas por dinero.
+        </p>
+      </div>
+
+      <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+        <h3 class="font-bold text-slate-700 mb-2 flex items-center gap-2">
+          <span class="text-xl">⚙️</span> El Cálculo Biológico
+        </h3>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Consideramos <strong>11.5 horas fijas</strong> para mantenimiento: 8h de sueño reparador y 3.5h para alimentación, higiene y logística básica. Es el "costo de estar vivo".
+        </p>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="text-center py-10 fade-in delay-300">
+      <h4 class="text-xl font-bold text-slate-900 mb-4">Tu franja verde es finita. No la regales.</h4>
+      
+      <a href="https://robertoleon.mx" target="_blank" class="inline-flex items-center justify-center bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold text-sm hover:bg-black transition-all shadow-xl hover:-translate-y-1 group">
+        <span>Conoce la Metodología Life Crafting</span>
+        <span class="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+      </a>
+      
+      <p class="text-[11px] text-slate-400 mt-8 font-medium">
+        &copy; 2025 Roberto León. Herramienta diseñada para autores y constructores de vida.
+      </p>
+    </footer>
+
+  </main>
+
+  <dialog id="modal-trapped" class="p-0 rounded-3xl shadow-2xl backdrop:bg-slate-900/60 max-w-sm w-full m-auto border-none">
+    <div class="bg-white p-8">
+      <div class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center text-2xl mb-4">🚫</div>
+      <h3 class="font-display font-bold text-slate-900 text-xl mb-3">Tiempo Desalineado</h3>
+      <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+        Son las horas que "desaparecen" sin dejar rastro de crecimiento o felicidad real:
+      </p>
+      <ul class="space-y-3 text-sm text-slate-700 mb-8">
+        <li class="flex items-start gap-3">
+          <span class="text-red-400 mt-0.5">•</span>
+          <span>Trabajos que no te retan ni te gustan.</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-red-400 mt-0.5">•</span>
+          <span>Scroll infinito en redes sociales.</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-red-400 mt-0.5">•</span>
+          <span>Tráfico y burocracia innecesaria.</span>
+        </li>
+      </ul>
+      <form method="dialog">
+        <button class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-black transition shadow-lg">Entendido</button>
+      </form>
+    </div>
+  </dialog>
+
+  <script>
+    const LIFE_EXPECTANCY = 80;
+    const RETIREMENT_AGE = 65;
+    const TOTAL_HOURS = 24;
+    const BIO_MAINTENANCE_HOURS = 11.5; 
+
+    const ageInput = document.getElementById('ageInput');
+    const ageError = document.getElementById('ageError');
+    const trappedSlider = document.getElementById('trappedSlider');
+    const trappedDisplay = document.getElementById('trappedDisplay');
+    const trappedContext = document.getElementById('trappedContext');
+    const resultYears = document.getElementById('resultYears');
+    const lockOverlay = document.getElementById('lockOverlay');
+    const diagnosisBox = document.getElementById('diagnosisBox');
+    const diagnosisTitle = document.getElementById('diagnosisTitle');
+    const diagnosisText = document.getElementById('diagnosisText');
+
+    const barPast = document.getElementById('barPast');
+    const barActiveContainer = document.getElementById('barActiveContainer');
+    const barBio = document.getElementById('barBio');
+    const barTrapped = document.getElementById('barTrapped');
+    const barConstructor = document.getElementById('barConstructor');
+    const barLegacy = document.getElementById('barLegacy');
+
+    const contexts = [
+      { max: 2, text: "🌟 LIDERAZGO: Tu tiempo está bajo tu mando." },
+      { max: 5, text: "⚖️ BALANCE: Gestión estándar, hay margen de mejora." },
+      { max: 9, text: "⚠️ SOBREVIVENCIA: El entorno está ganando la batalla." },
+      { max: 13, text: "🚨 EMERGENCIA: Casi no te queda tiempo para TI." }
+    ];
+
+    function updateLabelVisibility(element, percentage) {
+      const label = element.querySelector('.bar-label');
+      if (!label) return;
+      if (percentage < 5) {
+        label.classList.add('hide-label');
+      } else {
+        label.classList.remove('hide-label');
+      }
+    }
+
+    function calculate() {
+      let age = parseInt(ageInput.value);
+      let trappedDaily = parseFloat(trappedSlider.value);
+      
+      if (isNaN(age) || age < 14 || age > 60) {
+        ageError.classList.remove('hidden');
+        lockOverlay.classList.remove('hidden');
+        return; 
+      } else {
+        ageError.classList.add('hidden');
+        lockOverlay.classList.add('hidden');
+      }
+
+      const remainingActiveYears = Math.max(0, RETIREMENT_AGE - age);
+      const trappedRatio = trappedDaily / TOTAL_HOURS;
+      const lostYears = remainingActiveYears * trappedRatio;
+
+      let constructorHours = Math.max(0, TOTAL_HOURS - BIO_MAINTENANCE_HOURS - trappedDaily);
+      const efficiencyFactor = constructorHours / TOTAL_HOURS;
+      const effectiveYears = remainingActiveYears * efficiencyFactor;
+      
+      resultYears.innerText = effectiveYears.toFixed(1);
+      trappedDisplay.innerText = trappedDaily.toFixed(1);
+      
+      const ctx = contexts.find(c => trappedDaily <= c.max) || contexts[contexts.length - 1];
+      trappedContext.innerText = ctx.text;
+
+      if (trappedDaily <= 3) {
+        diagnosisBox.className = "rounded-2xl border p-5 text-left transition-all duration-500 bg-emerald-50 border-emerald-200 shadow-sm";
+        diagnosisTitle.className = "font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2 text-emerald-800";
+        diagnosisTitle.innerHTML = "<span>✅</span> DIAGNÓSTICO: ALTA POTENCIA";
+        diagnosisText.innerHTML = `Excelente gestión. Solo cedes <strong>${lostYears.toFixed(1)} años</strong> al ruido externo. Tienes un capital de construcción muy sólido.`;
+      } else if (trappedDaily <= 7) {
+        diagnosisBox.className = "rounded-2xl border p-5 text-left transition-all duration-500 bg-orange-50 border-orange-200 shadow-sm";
+        diagnosisTitle.className = "font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2 text-orange-800";
+        diagnosisTitle.innerHTML = "<span>⚠️</span> DIAGNÓSTICO: FUGA MODERADA";
+        diagnosisText.innerHTML = `Atención: Estás perdiendo <strong>${lostYears.toFixed(1)} años</strong> de tu vida activa en actividades que no te pertenecen. Es momento de renegociar con tu entorno.`;
+      } else {
+        diagnosisBox.className = "rounded-2xl border p-5 text-left transition-all duration-500 bg-red-50 border-red-200 shadow-sm";
+        diagnosisTitle.className = "font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2 text-red-800";
+        diagnosisTitle.innerHTML = "<span>🚨</span> DIAGNÓSTICO: IMPACTO CRÍTICO";
+        diagnosisText.innerHTML = `¡Alerta! Tu tiempo desalineado está "quemando" <strong>${lostYears.toFixed(1)} años</strong> de tu futuro. Tu franja verde es demasiado pequeña para el potencial que tienes.`;
+      }
+
+      const pastPct = (age / LIFE_EXPECTANCY) * 100;
+      const activeWindowPct = (remainingActiveYears / LIFE_EXPECTANCY) * 100;
+      const legacyPct = ((LIFE_EXPECTANCY - RETIREMENT_AGE) / LIFE_EXPECTANCY) * 100;
+
+      const bioPctInWindow = (BIO_MAINTENANCE_HOURS / TOTAL_HOURS) * 100;
+      const trappedPctInWindow = (trappedDaily / TOTAL_HOURS) * 100;
+      let constructorPctInWindow = 100 - bioPctInWindow - trappedPctInWindow;
+      if (constructorPctInWindow < 0) constructorPctInWindow = 0;
+
+      barPast.style.width = `${pastPct}%`;
+      barActiveContainer.style.width = `${activeWindowPct}%`;
+      barLegacy.style.width = `${legacyPct}%`;
+
+      barBio.style.width = `${bioPctInWindow}%`;
+      barTrapped.style.width = `${trappedPctInWindow}%`;
+      barConstructor.style.width = `${constructorPctInWindow}%`;
+
+      updateLabelVisibility(barPast, pastPct);
+      updateLabelVisibility(barBio, (activeWindowPct * bioPctInWindow) / 100);
+      updateLabelVisibility(barTrapped, (activeWindowPct * trappedPctInWindow) / 100);
+      updateLabelVisibility(barConstructor, (activeWindowPct * constructorPctInWindow) / 100);
+      updateLabelVisibility(barLegacy, legacyPct);
+    }
+
+    ageInput.addEventListener('input', calculate);
+    trappedSlider.addEventListener('input', calculate);
+
+    window.onload = calculate;
+  </script>
+</body>
+</html>
