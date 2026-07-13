@@ -355,11 +355,8 @@
             </div>
           </div>
 
-          <p class="text-slate-400 text-xs mt-4 max-w-xs mx-auto leading-relaxed">
-            Tu <strong class="text-emerald-700">franja verde</strong>: tiempo limpio para vivir quién eres mientras construyes tus cimientos.
-          </p>
-          <p class="text-[10px] text-slate-400 mt-2 max-w-xs mx-auto leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-2 py-1.5">
-            ℹ️ Cálculo hasta el retiro (65) sobre un horizonte de 80 años, descontando 11.5 h/día de Tiempo Básico + tus horas en fuga.
+          <p class="text-[10px] mt-4 font-bold uppercase tracking-widest text-slate-300">
+            ⏳ El Reloj Invisible · <span class="text-slate-400">¿Problema de Ricos?</span>
           </p>
 
           <!-- Overlay bloqueo -->
@@ -381,6 +378,25 @@
             Calculando…
           </p>
         </div>
+
+        <!-- Metodología (fuera de la zona de captura compartible) -->
+        <details class="text-left">
+          <summary class="flex items-center gap-2 text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors select-none cursor-pointer list-none px-1">
+            <span class="chevron text-slate-300 text-[9px]">▼</span>
+            ¿Cómo se calcula este número?
+          </summary>
+          <p class="mt-2 text-[11px] text-slate-500 leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-3 py-2">
+            Tu <strong class="text-emerald-700">Franja Verde</strong> es el tiempo limpio para vivir quién eres mientras construyes tus cimientos.
+            El cálculo va desde tu edad hasta el retiro (65) sobre un horizonte de vida de 80 años,
+            descontando cada día 11.5 horas de Tiempo Básico (sueño + necesidades esenciales) y tus horas en fuga.
+          </p>
+        </details>
+
+        <!-- Botón compartir -->
+        <button id="shareBtn" onclick="openShareCard()"
+          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl px-4 py-3 transition-colors flex items-center justify-center gap-2 shadow-lg">
+          📸 Compartir mi resultado
+        </button>
 
       </div>
     </div>
@@ -686,6 +702,9 @@
     if (trapped <= 2)      heroColor = 'text-emerald-600';
     else if (trapped <= 5) heroColor = 'text-orange-500';
     else                   heroColor = 'text-red-600';
+
+    // Guardar para la tarjeta compartible
+    window.lastResult = { age, effectiveYears, lifePct, trapped };
     resultYears.className = `text-8xl md:text-9xl font-display font-black ${heroColor} tracking-tighter number-transition pulse-soft`;
 
     // --- ETAPA DE VIDA (personalización del diagnóstico) ---
@@ -769,6 +788,82 @@
   ageInput.addEventListener('input', calculate);
   trappedSlider.addEventListener('input', calculate);
   calculate();
+
+  // ===== TARJETA COMPARTIBLE =====
+  function openShareCard() {
+    renderShareCard();
+    document.getElementById('shareModal').showModal();
+  }
+
+  function renderShareCard() {
+    const r = window.lastResult;
+    if (!r) return;
+    const showAge = document.getElementById('showAgeToggle').checked;
+
+    // Línea superior: con o sin edad
+    document.getElementById('shareTopLine').innerText = showAge
+      ? `Tengo ${r.age} años. Hice la cuenta y esto me queda:`
+      : 'Hice la cuenta de mi vida. Y esto me queda:';
+
+    // Número héroe con color según severidad
+    const num = document.getElementById('shareNumber');
+    num.innerText = r.effectiveYears.toFixed(1);
+    num.style.color = r.trapped <= 2 ? '#34d399' : (r.trapped <= 5 ? '#fb923c' : '#f87171');
+
+    // Frase remate según severidad
+    const phrase = r.trapped <= 2
+      ? '"Y sé exactamente qué hacer con ellos."'
+      : (r.trapped <= 5 ? '"Y la arena sigue cayendo."' : '"Y apenas acabo de darme cuenta."');
+    document.getElementById('sharePhrase').innerText = phrase;
+  }
+
+  function downloadShareCard() {
+    const card = document.getElementById('shareCard');
+    if (typeof html2canvas === 'undefined') { alert('Toma una captura de pantalla de la tarjeta 📸'); return; }
+    html2canvas(card, { backgroundColor: '#020617', scale: 3 }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'mi-franja-verde.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }).catch(() => alert('Toma una captura de pantalla de la tarjeta 📸'));
+  }
 </script>
+
+<!-- ===== TARJETA COMPARTIBLE ===== -->
+<dialog id="shareModal" class="p-0 rounded-3xl shadow-2xl backdrop:bg-slate-900/70 max-w-md w-full m-auto bg-transparent">
+  <div class="bg-white rounded-3xl overflow-hidden">
+
+    <!-- Toggle mostrar edad -->
+    <div class="flex items-center justify-between px-5 py-3 bg-slate-50 border-b border-slate-100">
+      <label for="showAgeToggle" class="text-xs font-bold text-slate-600 select-none cursor-pointer">Mostrar mi edad en la tarjeta</label>
+      <input type="checkbox" id="showAgeToggle" checked onchange="renderShareCard()"
+        class="w-9 h-5 accent-emerald-600 cursor-pointer">
+    </div>
+
+    <!-- LA TARJETA (zona de captura) -->
+    <div id="shareCard" class="bg-slate-950 px-8 py-10 text-center" style="background: radial-gradient(ellipse at top, #1e293b 0%, #020617 65%);">
+      <div class="text-3xl mb-4">⏳</div>
+      <p id="shareTopLine" class="text-slate-300 font-display font-bold text-lg tracking-wide uppercase mb-1">Tengo 30 años.</p>
+      <div class="my-2">
+        <span id="shareNumber" class="font-display font-black text-emerald-400 tracking-tighter" style="font-size: 6rem; line-height: 1;">5.1</span>
+      </div>
+      <p class="text-slate-200 font-bold text-xl -mt-1 mb-4">años de vida real</p>
+      <p id="sharePhrase" class="text-slate-400 italic text-base mb-6">"Y la arena sigue cayendo."</p>
+      <p class="text-emerald-400 font-bold text-sm mb-5">¿Cuánta vida te queda a ti?</p>
+      <div class="border-t border-slate-700/60 pt-4">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">⏳ El Reloj Invisible · <span class="text-slate-400">¿Problema de Ricos?</span></p>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="flex gap-2 p-4 bg-slate-50">
+      <button onclick="downloadShareCard()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl px-4 py-2.5 transition-colors">⬇️ Descargar imagen</button>
+      <button onclick="document.getElementById('shareModal').close()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-sm rounded-xl px-4 py-2.5 transition-colors">Cerrar</button>
+    </div>
+    <p class="text-[10px] text-slate-400 text-center pb-3 px-4">Si la descarga no funciona en tu dispositivo, toma una captura de pantalla de la tarjeta.</p>
+  </div>
+</dialog>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 </body>
 </html>
