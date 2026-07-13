@@ -817,15 +817,42 @@
     document.getElementById('sharePhrase').innerText = phrase;
   }
 
-  function downloadShareCard() {
-    const card = document.getElementById('shareCard');
-    if (typeof html2canvas === 'undefined') { alert('Toma una captura de pantalla de la tarjeta 📸'); return; }
-    html2canvas(card, { backgroundColor: '#020617', scale: 3 }).then(canvas => {
+  async function captureShareCard() {
+    if (typeof html2canvas === 'undefined') throw new Error('html2canvas no disponible');
+    // Esperar a que las fuentes web estén listas: evita que el número se dibuje encima del texto
+    if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+    return html2canvas(document.getElementById('shareCard'), { backgroundColor: '#020617', scale: 3, useCORS: true });
+  }
+
+  async function downloadShareCard() {
+    try {
+      const canvas = await captureShareCard();
       const link = document.createElement('a');
       link.download = 'mi-franja-verde.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
-    }).catch(() => alert('Toma una captura de pantalla de la tarjeta 📸'));
+    } catch (e) { alert('Toma una captura de pantalla de la tarjeta 📸'); }
+  }
+
+  async function shareCardNative() {
+    try {
+      const canvas = await captureShareCard();
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      const file = new File([blob], 'mi-franja-verde.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Mi Franja Verde',
+          text: '¿Cuánta vida te queda a ti? ⏳ El Reloj Invisible'
+        });
+      } else {
+        // Escritorio o navegador sin Web Share: caer a descarga
+        downloadShareCard();
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return; // el usuario canceló el menú de compartir
+      alert('Toma una captura de pantalla de la tarjeta 📸');
+    }
   }
 </script>
 
@@ -844,10 +871,10 @@
     <div id="shareCard" class="bg-slate-950 px-8 py-10 text-center" style="background: radial-gradient(ellipse at top, #1e293b 0%, #020617 65%);">
       <div class="text-3xl mb-4">⏳</div>
       <p id="shareTopLine" class="text-slate-300 font-display font-bold text-lg tracking-wide uppercase mb-1">Tengo 30 años.</p>
-      <div class="my-2">
-        <span id="shareNumber" class="font-display font-black text-emerald-400 tracking-tighter" style="font-size: 6rem; line-height: 1;">5.1</span>
+      <div style="padding: 4px 0 8px 0;">
+        <span id="shareNumber" class="font-display font-black text-emerald-400 tracking-tighter" style="font-size: 5.5rem; line-height: 1.1; display: inline-block;">5.1</span>
       </div>
-      <p class="text-slate-200 font-bold text-xl -mt-1 mb-4">años de vida real</p>
+      <p class="text-slate-200 font-bold text-xl" style="margin: 0 0 16px 0;">años de vida real</p>
       <p id="sharePhrase" class="text-slate-400 italic text-base mb-6">"Y la arena sigue cayendo."</p>
       <p class="text-emerald-400 font-bold text-sm mb-5">¿Cuánta vida te queda a ti?</p>
       <div class="border-t border-slate-700/60 pt-4">
@@ -857,7 +884,8 @@
 
     <!-- Acciones -->
     <div class="flex gap-2 p-4 bg-slate-50">
-      <button onclick="downloadShareCard()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl px-4 py-2.5 transition-colors">⬇️ Descargar imagen</button>
+      <button id="nativeShareBtn" onclick="shareCardNative()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl px-4 py-2.5 transition-colors">📤 Compartir</button>
+      <button onclick="downloadShareCard()" class="flex-1 bg-slate-700 hover:bg-slate-800 text-white font-bold text-sm rounded-xl px-4 py-2.5 transition-colors">⬇️ Descargar</button>
       <button onclick="document.getElementById('shareModal').close()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-sm rounded-xl px-4 py-2.5 transition-colors">Cerrar</button>
     </div>
     <p class="text-[10px] text-slate-400 text-center pb-3 px-4">Si la descarga no funciona en tu dispositivo, toma una captura de pantalla de la tarjeta.</p>
