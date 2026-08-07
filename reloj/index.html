@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Reloj Invisible — Descubre tu Franja Verde</title>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⏳</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+          },
+          colors: {
+            'brand-dark': '#0f172a',
+            'brand-bio': '#64748b',
+            'brand-accent': '#10b981',
+            'brand-trapped': '#ef4444',
+            'brand-legacy': '#6366f1',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background: linear-gradient(160deg, #f1f5f9 0%, #e2e8f0 60%, #dde1e9 100%);
+      min-height: 100vh;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+    }
+
+    .intro-card {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.4);
+    }
+
+    /* Patrón para Mantenimiento Biológico */
+    .pattern-bio {
+      background-color: #e2e8f0;
+      background-image: linear-gradient(
+        45deg, #cbd5e1 25%, transparent 25%, transparent 50%,
+        #cbd5e1 50%, #cbd5e1 75%, transparent 75%, transparent
+      );
+      background-size: 8px 8px;
+    }
+
+    /* Patrón rayado rojo para el tiempo atrapado */
+    .pattern-trapped {
+      background-color: #fee2e2;
+      background-image: repeating-linear-gradient(
+        135deg,
+        rgba(239, 68, 68, 0.15) 0px, rgba(239, 68, 68, 0.15) 4px,
+        transparent 4px, transparent 8px
+      );
+    }
+
+    /* Slider personalizado */
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 24px; width: 24px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-top: -10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%; height: 6px;
+      cursor: pointer;
+      background: #e2e8f0;
+      border-radius: 99px;
+    }
+
+    .fade-in { animation: fadeIn 0.7s ease-out forwards; opacity: 0; transform: translateY(12px); }
+    .delay-50  { animation-delay: 0.05s; }
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
+    .delay-400 { animation-delay: 0.4s; }
+    .delay-500 { animation-delay: 0.5s; }
+    @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+    .number-transition { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    .bar-label {
+      transition: opacity 0.3s ease;
+      opacity: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      display: inline-block;
+    }
+    .hide-label { opacity: 0 !important; pointer-events: none; }
+
+    /* Highlight del time constructor */
+    .green-glow {
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.15);
+    }
+
+    /* Pulso animado para el número principal */
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+    .pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+
+    /* Ejemplos desplegables */
+    details > summary { cursor: pointer; list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    details[open] .chevron { transform: rotate(180deg); }
+    summary::-webkit-details-marker { display: none; }
+    summary { list-style: none; }
+    .chevron { transition: transform 0.2s ease; display: inline-block; }
+
+    /* Barra del constructor con efecto vivo */
+    #barConstructor {
+      position: relative;
+      overflow: hidden;
+    }
+    #barConstructor::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+      animation: shimmer 2.5s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Separador de sección */
+    .section-divider {
+      border: none;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+    }
+
+    /* Quote de reflexión */
+    .reflection-quote {
+      border-left: 3px solid #10b981;
+      background: linear-gradient(to right, rgba(16,185,129,0.05), transparent);
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased py-8 px-4 flex justify-center items-start">
+
+<main class="w-full max-w-4xl space-y-6">
+
+  <!-- ===== HEADER ===== -->
+  <header class="text-center space-y-2 fade-in">
+    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-md mb-2 text-3xl">
+      ⏳
+    </div>
+    <h1 class="font-display text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+      El Reloj <span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-500 to-slate-900">Invisible</span>
+    </h1>
+    <p class="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
+      Descubre el tamaño real de <strong class="text-emerald-700">tu Franja Verde</strong>: el tiempo que de verdad te pertenece.
+    </p>
+    <div class="inline-block px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[11px] font-medium border border-slate-200">
+      De: <em>Problema de Ricos</em> — Roberto León · Metodología Life Crafting™
+    </div>
+  </header>
+
+  <!-- ===== INTRO EMOCIONAL ===== -->
+  <section class="intro-card rounded-3xl fade-in delay-50">
+    <details>
+      <summary class="flex items-center gap-3 p-5 md:p-6 cursor-pointer select-none list-none">
+        <span class="text-2xl flex-shrink-0">⏳</span>
+        <span class="flex-1 font-display font-bold text-white text-sm md:text-base">La arena sigue cayendo — ¿por qué este ejercicio?</span>
+        <span class="chevron text-slate-400 text-xs">▼</span>
+      </summary>
+      <div class="px-5 md:px-6 pb-6 space-y-3">
+        <p class="text-slate-200 text-sm md:text-base leading-relaxed">
+          Imagina que alguien te entrega un reloj de arena que representa toda tu vida.
+          La arena del compartimento superior es el tiempo que te queda.
+          Lo único que sabes con certeza es que, en este preciso momento, mientras lees estas palabras,
+          <strong class="text-white">la arena sigue cayendo. Grano a grano. Sin pausa. Sin reversa.</strong>
+        </p>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Este ejercicio no te muestra cuánto tiempo te <em>queda</em>. Te muestra cuánto tiempo
+          tienes disponible para vivir realmente: para expresar quién eres mientras construyes las condiciones
+          que te permiten seguir haciéndolo. Ese tiempo es <strong class="text-emerald-400">tu Franja Verde</strong>,
+          y es mucho más pequeño de lo que imaginas.
+        </p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ===== INSTRUCCIONES ===== -->
+  <section class="glass-card rounded-3xl fade-in delay-100">
+    <details>
+      <summary class="flex items-center gap-3 p-5 md:p-6 cursor-pointer select-none list-none">
+        <span class="text-lg flex-shrink-0">📋</span>
+        <span class="flex-1 font-display font-bold text-slate-800 text-sm md:text-base">Cómo usar esta herramienta <span class="font-normal text-slate-400 text-xs">(2 pasos + ejemplos)</span></span>
+        <span class="chevron text-slate-400 text-xs">▼</span>
+      </summary>
+      <div class="px-5 md:px-6 pb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-600">
+      <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+        <div class="font-bold text-slate-800 mb-1">① Tu edad</div>
+        <p>Ingresa tu edad actual. La herramienta calculará tu ventana constructora hasta los 65 años.</p>
+      </div>
+      <div class="bg-red-50 rounded-xl p-3 border border-red-100">
+        <div class="font-bold text-red-800 mb-1">② Tu tiempo en fuga</div>
+        <p>Horas diarias que <strong>NI expresan tus declaraciones de identidad hoy NI construyen tus cimientos</strong>.
+          La herramienta ya descuenta 8h de sueño + 3.5h de necesidades básicas.</p>
+      </div>
+      <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+        <div class="font-bold text-emerald-800 mb-1">③ Sé brutalmente honesto</div>
+        <p>Este número depende de tu trabajo y tu organización diaria. El objetivo es una <strong>fotografía honesta</strong> de un día estándar, no perfecto.</p>
+      </div>
+    </div>
+
+    <!-- Ejemplos desplegables -->
+    <details class="mt-4">
+      <summary class="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors select-none">
+        <span class="chevron text-slate-400">▼</span>
+        ¿Cómo sé qué número poner en el slider?
+      </summary>
+      <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-sm">
+          <div class="font-bold text-emerald-800 mb-1">Ejemplo A — Trabajo alineado</div>
+          <p class="text-emerald-900 leading-relaxed">
+            Tu declaración es <em>"Soy alguien que contribuye al crecimiento de otros"</em> y tu trabajo como educador
+            vive esa verdad, te da autonomía económica y tiempo de calidad fuera del trabajo.
+          </p>
+          <div class="mt-2 inline-flex items-center gap-1 bg-emerald-100 px-2 py-1 rounded-lg text-xs font-bold text-emerald-800">
+            → Ingresa: 0 – 2 horas
+          </div>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-sm">
+          <div class="font-bold text-red-800 mb-1">Ejemplo B — Solo para pagar cuentas</div>
+          <p class="text-red-900 leading-relaxed">
+            Tu trabajo cubre deudas pero te agota sin darte crecimiento ni autonomía real.
+            No conecta con ninguna de tus declaraciones y no te deja energía para nada más fuera del trabajo.
+          </p>
+          <div class="mt-2 inline-flex items-center gap-1 bg-red-100 px-2 py-1 rounded-lg text-xs font-bold text-red-800">
+            → Ingresa: 9 – 12 horas
+          </div>
+        </div>
+      </div>
+      <p class="mt-3 text-xs text-slate-500 italic leading-relaxed">
+        ⚠️ La comodidad sin expresión de tus declaraciones es una de las formas más sutiles de perder tu tiempo.
+        No duele como un trabajo horrible, pero igualmente te está robando la oportunidad de vivir realmente.
+      </p>
+    </details>
+      </div>
+    </details>
+  </section>
+
+  <!-- ===== CALCULADORA PRINCIPAL ===== -->
+  <section class="glass-card rounded-3xl p-6 md:p-8 fade-in delay-200 relative overflow-hidden">
+
+    <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+    <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 relative z-10">
+
+      <!-- PANEL INPUTS -->
+      <div class="md:col-span-5 space-y-5">
+
+        <!-- EDAD -->
+        <div class="bg-white/60 p-4 rounded-2xl border border-white shadow-sm">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+            Tu Edad (14 – 60 años)
+          </label>
+          <div class="flex items-center gap-3">
+            <input type="number" id="ageInput" value="30" min="14" max="60"
+              class="w-full text-4xl font-display font-bold bg-transparent border-b-2 border-slate-200 focus:border-brand-accent outline-none transition-colors py-1 text-slate-800"
+              placeholder="30">
+            <span class="text-sm font-bold text-slate-400">años</span>
+          </div>
+          <p id="ageError" class="text-xs text-red-500 mt-2 font-medium hidden">
+            ⚠️ Esta herramienta está diseñada para la Ventana Verde (14–60 años).
+          </p>
+        </div>
+
+        <!-- TIEMPO DESALINEADO -->
+        <div class="bg-white/60 p-4 rounded-2xl border border-white shadow-sm">
+          <div class="flex justify-between items-end mb-2">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 leading-tight">
+              Horas en Fuga (diarias)
+            </label>
+            <button onclick="document.getElementById('modal-trapped').showModal()"
+              class="text-[10px] text-brand-trapped font-bold hover:underline cursor-pointer uppercase tracking-wide flex-shrink-0 ml-2">
+              ¿Qué es esto?
+            </button>
+          </div>
+
+          <div class="flex items-end gap-2 mb-2">
+            <span class="text-5xl font-display font-bold text-brand-trapped" id="trappedDisplay">9.0</span>
+            <span class="text-xs font-bold text-slate-400 mb-2">horas/día</span>
+          </div>
+
+          <input type="range" id="trappedSlider" min="0" max="12.5" step="0.5" value="9"
+            class="w-full accent-red-500 mb-3">
+
+          <div id="trappedContext"
+            class="text-xs font-medium text-slate-500 bg-slate-100 p-2 rounded-lg border border-slate-200 leading-relaxed">
+            Trabajo de supervivencia, tráfico…
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PANEL RESULTADO -->
+      <div class="md:col-span-7 flex flex-col justify-center space-y-4">
+
+        <!-- Número principal -->
+        <div class="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 p-6 text-center shadow-inner relative overflow-hidden">
+
+          <div class="mb-4">
+            <span class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-widest">
+              Tu Capital Real
+            </span>
+          </div>
+
+          <div class="relative block">
+            <span id="resultYears"
+              class="text-8xl md:text-9xl font-display font-black text-slate-800 tracking-tighter number-transition pulse-soft">
+              0.0
+            </span>
+            <p class="text-xl md:text-2xl font-bold text-slate-600 mt-[-8px]">Años Efectivos</p>
+          </div>
+
+          <!-- Stats secundarias: conexión con la revelación del capítulo -->
+          <div class="mt-4 grid grid-cols-2 gap-2 max-w-xs mx-auto">
+            <div class="bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+              <div class="text-2xl font-display font-bold text-emerald-700 number-transition"><span id="resultPct">0</span>%</div>
+              <div class="text-[10px] font-bold uppercase tracking-wide text-emerald-600 leading-tight">de tu vida total</div>
+            </div>
+            <div class="bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+              <div class="text-2xl font-display font-bold text-red-600 number-transition"><span id="resultLost">0</span></div>
+              <div class="text-[10px] font-bold uppercase tracking-wide text-red-500 leading-tight">años en fuga</div>
+            </div>
+          </div>
+
+          <p class="text-[10px] mt-4 font-bold uppercase tracking-widest text-slate-300">
+            ⏳ El Reloj Invisible · <span class="text-slate-400">¿Problema de Ricos?</span>
+          </p>
+
+          <!-- Overlay bloqueo -->
+          <div id="lockOverlay"
+            class="absolute inset-0 bg-slate-100/90 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-6 text-center hidden">
+            <span class="text-4xl mb-2">🔒</span>
+            <h3 class="font-bold text-slate-800">Fuera de Rango</h3>
+            <p class="text-sm text-slate-500 mt-1">Ingresa una edad entre 14 y 60 años.</p>
+          </div>
+        </div>
+
+        <!-- DIAGNÓSTICO -->
+        <div id="diagnosisBox" class="rounded-xl border p-4 text-left transition-all duration-500 bg-red-50 border-red-200">
+          <h4 id="diagnosisTitle"
+            class="font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2 text-red-800">
+            <span>🚨</span> Diagnóstico de Pérdida
+          </h4>
+          <p id="diagnosisText" class="text-sm leading-relaxed text-red-900">
+            Calculando…
+          </p>
+        </div>
+
+        <!-- Metodología (fuera de la zona de captura compartible) -->
+        <details class="text-left">
+          <summary class="flex items-center gap-2 text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors select-none cursor-pointer list-none px-1">
+            <span class="chevron text-slate-300 text-[9px]">▼</span>
+            ¿Cómo se calcula este número?
+          </summary>
+          <p class="mt-2 text-[11px] text-slate-500 leading-relaxed bg-slate-50 border border-slate-100 rounded-lg px-3 py-2">
+            Tu <strong class="text-emerald-700">Franja Verde</strong> es el tiempo limpio para vivir quién eres mientras construyes tus cimientos.
+            El cálculo va desde tu edad hasta el retiro (65) sobre un horizonte de vida de 80 años,
+            descontando cada día 11.5 horas de Tiempo Básico (sueño + necesidades esenciales) y tus horas en fuga.
+          </p>
+        </details>
+
+        <!-- Botón compartir -->
+        <button id="shareBtn" onclick="openShareCard()"
+          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl px-4 py-3 transition-colors flex items-center justify-center gap-2 shadow-lg">
+          📸 Compartir mi resultado
+        </button>
+
+      </div>
+    </div>
+
+    <!-- ===== BARRA DE VIDA ===== -->
+    <div class="mt-10 pt-8 border-t border-slate-100">
+      <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">
+        <span>0 Años</span>
+        <span>80 Años</span>
+      </div>
+
+      <div class="h-16 w-full bg-slate-200 rounded-xl overflow-hidden flex shadow-inner ring-1 ring-slate-200 relative">
+
+        <!-- PASADO -->
+        <div id="barPast"
+          class="bg-slate-500 h-full flex items-center justify-center border-r border-white/20 transition-all duration-700 relative overflow-hidden"
+          style="width: 30%">
+          <span class="text-white text-[10px] font-bold px-1 z-10 bar-label-container bar-label">VIVIDO</span>
+        </div>
+
+        <!-- FUTURO ACTIVO -->
+        <div id="barActiveContainer" class="flex h-full transition-all duration-700 bg-white relative" style="width: 50%">
+
+          <!-- Bio / básico -->
+          <div id="barBio"
+            class="pattern-bio h-full flex items-center justify-center border-r border-slate-300/50 relative overflow-hidden"
+            style="width: 48%">
+            <span class="bar-label-container bar-label text-slate-400 text-[9px] font-bold px-1 text-center">
+              <span class="md:hidden">BASE</span>
+              <span class="hidden md:inline">BÁSICO</span>
+            </span>
+          </div>
+
+          <!-- Tiempo desalineado -->
+          <div id="barTrapped"
+            class="pattern-trapped h-full flex items-center justify-center border-r border-red-100 transition-all duration-300 overflow-hidden"
+            style="width: 30%">
+            <span class="bar-label-container bar-label text-red-900 text-[9px] font-bold bg-white/40 px-1 rounded text-center">
+              <span class="md:hidden">FUGA</span>
+              <span class="hidden md:inline">EN FUGA</span>
+            </span>
+          </div>
+
+          <!-- La Franja Verde -->
+          <div id="barConstructor"
+            class="bg-emerald-500 h-full flex items-center justify-center relative transition-all duration-500 overflow-hidden"
+            style="width: 22%">
+            <span class="text-white text-[10px] font-bold drop-shadow-md z-10 bar-label-container bar-label">TÚ</span>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
+          </div>
+
+        </div>
+
+        <!-- LEGADO -->
+        <div id="barLegacy"
+          class="bg-indigo-200 h-full flex items-center justify-center border-l border-white/20 transition-all duration-700 overflow-hidden"
+          style="width: 20%">
+          <span class="text-indigo-800/70 text-[10px] font-bold bar-label-container bar-label">LEGADO</span>
+        </div>
+      </div>
+
+      <!-- Leyenda -->
+      <div class="mt-4 flex flex-wrap justify-center gap-3 md:gap-6 text-[10px] md:text-xs text-slate-500 font-medium">
+        <div class="flex items-center gap-1.5"><div class="w-3 h-3 pattern-bio border border-slate-300 rounded-sm"></div>Tiempo Básico (11.5h/día)</div>
+        <div class="flex items-center gap-1.5"><div class="w-3 h-3 pattern-trapped border border-red-300 rounded-sm"></div>Tiempo en Fuga</div>
+        <div class="flex items-center gap-1.5"><div class="w-3 h-3 bg-emerald-500 rounded-sm shadow-sm"></div><strong class="text-emerald-700">Tu Franja Verde</strong></div>
+        <div class="flex items-center gap-1.5"><div class="w-3 h-3 bg-indigo-200 border border-indigo-300 rounded-sm"></div>Legado (65+)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MIRA TU FRANJA VERDE ===== -->
+  <section id="franjaVerdeSection" class="glass-card rounded-3xl fade-in delay-300 border-l-4 border-emerald-400">
+    <details>
+      <summary class="flex items-center gap-3 p-5 md:p-6 cursor-pointer select-none list-none">
+        <span class="text-2xl flex-shrink-0">🌱</span>
+        <span class="flex-1 font-display font-bold text-slate-900 text-sm md:text-base">¿Qué significa tu Franja Verde?</span>
+        <span class="chevron text-slate-400 text-xs">▼</span>
+      </summary>
+      <div class="px-5 md:px-6 pb-6 space-y-3">
+        <p class="text-slate-600 text-sm md:text-base leading-relaxed">
+          Esa pequeña franja verde de la barra es la estimación de todo tu
+          <strong class="text-emerald-700">Franja Verde</strong> dentro de tu Ventana Verde: el único espacio donde puedes
+          vivir tus declaraciones de identidad ahora mismo, mientras simultáneamente fortaleces los cimientos
+          que sostienen tu capacidad de seguir eligiendo cómo expresarlas.
+        </p>
+        <p class="text-slate-600 text-sm md:text-base leading-relaxed">
+          Es tu materia prima. Tu arcilla. El lienzo donde puedes edificar tu existencia con significado.
+          Y lo que ves es un <strong class="text-slate-900">recurso finito y extremadamente limitado</strong>.
+          No puedes comprar más. No puedes fabricar más de ese espacio verde.
+        </p>
+        <div class="reflection-quote pl-4 py-2 rounded-r-xl text-sm text-slate-700 italic leading-relaxed">
+          "Entre más grande sea esa porción, más estarás viviendo, construyendo y eligiendo.<br>
+          Entre más pequeña, más estarás reaccionando por necesidad."
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ===== TARJETAS EDUCATIVAS ===== -->
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-4 fade-in delay-400">
+    <div class="bg-white px-5 py-4 rounded-2xl shadow-sm border border-slate-100">
+      <details>
+      <summary class="flex items-center gap-2 cursor-pointer select-none list-none">
+        <span class="flex-1 font-bold text-sm text-emerald-700">🌱 La Franja Verde</span>
+        <span class="chevron text-slate-300 text-xs">▼</span>
+      </summary>
+      <p class="mt-2 text-xs text-slate-600 leading-relaxed">
+        Es la pequeña franja verde. El único momento donde tienes energía y claridad para
+        <strong>vivir tus declaraciones de identidad HOY</strong> mientras construyes tu libertad de mañana.
+        No es sacrificio del presente. Es <strong>Construir Viviendo</strong>.
+      </p>
+    </details>
+    </div>
+    <div class="bg-white px-5 py-4 rounded-2xl shadow-sm border border-slate-100">
+      <details>
+      <summary class="flex items-center gap-2 cursor-pointer select-none list-none">
+        <span class="flex-1 font-bold text-sm text-slate-600">⏱️ Tiempo Básico (11.5 h/día)</span>
+        <span class="chevron text-slate-300 text-xs">▼</span>
+      </summary>
+      <p class="mt-2 text-xs text-slate-600 leading-relaxed">
+        La franja gris. Incluye 8h de sueño + 3.5h de higiene, comidas, desplazamientos y
+        pausas esenciales. Es una estimación estándar. No está disponible para ningún otro fin:
+        tu cuerpo y tu mente lo necesitan para funcionar.
+      </p>
+    </details>
+    </div>
+    <div class="bg-white px-5 py-4 rounded-2xl shadow-sm border border-red-50">
+      <details>
+      <summary class="flex items-center gap-2 cursor-pointer select-none list-none">
+        <span class="flex-1 font-bold text-sm text-red-600">🚫 Tiempo en Fuga</span>
+        <span class="chevron text-slate-300 text-xs">▼</span>
+      </summary>
+      <p class="mt-2 text-xs text-slate-600 leading-relaxed">
+        Horas conscientes que no expresan quién eres ni construyen tus cimientos.
+        Trabajo que solo paga deudas, tráfico excesivo, actividades sin propósito.
+        <strong>Este es el número que tienes el poder de cambiar.</strong>
+      </p>
+    </details>
+    </div>
+    <div class="bg-white px-5 py-4 rounded-2xl shadow-sm border border-indigo-50">
+      <details>
+      <summary class="flex items-center gap-2 cursor-pointer select-none list-none">
+        <span class="flex-1 font-bold text-sm text-indigo-600">✨ Tiempo de Legado (65+)</span>
+        <span class="chevron text-slate-300 text-xs">▼</span>
+      </summary>
+      <p class="mt-2 text-xs text-slate-600 leading-relaxed">
+        La franja azul. Los cimientos que construiste durante tu Ventana Verde
+        te darán libertad para adaptar cómo expresas tus declaraciones según tu energía,
+        intereses y circunstancias de ese momento.
+      </p>
+    </details>
+    </div>
+  </section>
+
+  <!-- ===== NOTA DE COMPASIÓN ===== -->
+  <section class="bg-amber-50 border border-amber-200 rounded-3xl p-6 md:p-8 fade-in delay-400">
+    <div class="flex items-start gap-3">
+      <span class="text-2xl flex-shrink-0">💛</span>
+      <div class="space-y-2">
+        <h3 class="font-bold text-amber-900 text-base">Un recordatorio importante</h3>
+        <p class="text-sm text-amber-900 leading-relaxed">
+          Si al usar esta herramienta sientes ansiedad, culpa o te abrumas por "tiempo perdido",
+          <strong>detente un momento.</strong> No se trata de lamentar el pasado. El tiempo que ya pasó
+          es tu cimiento. Cada experiencia, incluso las que parecen "perdidas", te han traído hasta aquí
+          y han formado quién eres. Se trata de actuar desde hoy: con compasión hacia ti mismo,
+          con realismo sobre tus circunstancias, con valentía para hacer cambios, aunque sean pequeños.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <footer class="text-center py-6 fade-in delay-500">
+    <div class="inline-block p-1 bg-slate-100 rounded-full mb-4">
+      <span class="px-4 py-1.5 bg-white rounded-full text-xs font-bold text-slate-600 shadow-sm border border-slate-200">
+        La arena sigue cayendo. ¿Qué harás con ella?
+      </span>
+    </div>
+    <h4 class="text-lg md:text-xl font-display font-bold text-slate-900 mb-2">
+      No dejes que tu franja verde desaparezca.
+    </h4>
+    <p class="text-sm text-slate-500 mb-5 max-w-md mx-auto">
+      Regresa al Capítulo 3 de <em>Problema de Ricos</em> para descubrir cómo expandir tu Franja Verde y qué hacer con cada hora recuperada.
+    </p>
+    <a href="/" class="inline-flex items-center justify-center bg-slate-900 text-white px-8 py-3.5 rounded-full font-bold text-sm hover:bg-slate-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 group">
+      <span>Continuar en el libro</span>
+      <span class="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+    </a>
+  </footer>
+
+  <footer class="text-center text-[11px] text-gray-400 pb-6">
+    &copy; 2025 Roberto León. Todos los derechos reservados.<br>
+    Herramienta basada en la Metodología Life Crafting™ · <em>Problema de Ricos</em>
+  </footer>
+
+</main>
+
+<!-- ===== MODAL AYUDA ===== -->
+<dialog id="modal-trapped" class="p-0 rounded-2xl shadow-2xl backdrop:bg-slate-900/50 max-w-sm w-full m-auto">
+  <div class="bg-white p-6">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-xl">🚫</span>
+      <h3 class="font-bold text-slate-800 text-lg">¿Qué son las Horas en Fuga?</h3>
+    </div>
+    <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+      Son horas conscientes que <strong>NI expresan quién eres realmente hoy NI construyen las condiciones</strong>
+      para sostener esa expresión mañana.
+    </p>
+    <ul class="space-y-2 text-sm text-slate-600 mb-5 bg-slate-50 p-3 rounded-xl border border-slate-100">
+      <li class="flex gap-2">❌ <span>Trabajo que solo paga cuentas y te agota sin aportar crecimiento ni autonomía.</span></li>
+      <li class="flex gap-2">❌ <span>Tráfico excesivo o commutes que drenan sin aportar nada.</span></li>
+      <li class="flex gap-2">❌ <span>Redes sociales, entretenimiento o actividades sin intención.</span></li>
+    </ul>
+    <p class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg p-3 mb-4 leading-relaxed">
+      ⚠️ <strong>Nota:</strong> Si tu trabajo <em>sí</em> expresa tus declaraciones de identidad o construye tus cimientos
+      (salud, autonomía económica, conexiones, habilidades), no lo cuentes aquí.
+    </p>
+    <form method="dialog">
+      <button class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl hover:bg-slate-700 transition">
+        Entendido, cerrar
+      </button>
+    </form>
+  </div>
+</dialog>
+
+<script>
+  // --- CONFIGURACIÓN ---
+  const LIFE_EXPECTANCY = 80;
+  const RETIREMENT_AGE  = 65;
+  const TOTAL_HOURS     = 24;
+  const BIO_MAINTENANCE = 11.5;
+
+  // DOM refs
+  const ageInput       = document.getElementById('ageInput');
+  const ageError       = document.getElementById('ageError');
+  const trappedSlider  = document.getElementById('trappedSlider');
+  const trappedDisplay = document.getElementById('trappedDisplay');
+  const trappedContext = document.getElementById('trappedContext');
+  const resultYears    = document.getElementById('resultYears');
+  const resultPct      = document.getElementById('resultPct');
+  const resultLost     = document.getElementById('resultLost');
+  const lockOverlay    = document.getElementById('lockOverlay');
+  const diagnosisBox   = document.getElementById('diagnosisBox');
+  const diagnosisTitle = document.getElementById('diagnosisTitle');
+  const diagnosisText  = document.getElementById('diagnosisText');
+  const barPast        = document.getElementById('barPast');
+  const barActiveContainer = document.getElementById('barActiveContainer');
+  const barBio         = document.getElementById('barBio');
+  const barTrapped     = document.getElementById('barTrapped');
+  const barConstructor = document.getElementById('barConstructor');
+  const barLegacy      = document.getElementById('barLegacy');
+
+  // Mensajes cortos del slider
+  const sliderContextMessages = [
+    { max: 1.5, text: "🌿 Casi perfecta alineación — tus horas trabajan para ti." },
+    { max: 4,   text: "⚖️ Balance promedio — hay margen para recuperar más." },
+    { max: 7,   text: "⚠️ Zona de alerta — una parte importante de tu tiempo se escapa." },
+    { max: 10,  text: "🚨 Estado crítico — la mayor parte de tus horas activas no construyen nada para ti." },
+    { max: 13,  text: "🔴 Punto crítico — casi no queda franja verde. Aún puedes recuperarla." }
+  ];
+
+  function updateLabelVisibility(element, segmentPctOfLife) {
+    const lc = element.querySelector('.bar-label-container');
+    if (!lc) return;
+    lc.classList.toggle('hide-label', segmentPctOfLife < 4);
+  }
+
+  function calculate() {
+    const age         = parseInt(ageInput.value);
+    const trapped     = parseFloat(trappedSlider.value);
+
+    // Validación
+    if (isNaN(age) || age < 14 || age > 60) {
+      ageError.classList.remove('hidden');
+      lockOverlay.classList.remove('hidden');
+      ageInput.classList.add('text-red-500');
+      return;
+    }
+    ageError.classList.add('hidden');
+    lockOverlay.classList.add('hidden');
+    ageInput.classList.remove('text-red-500');
+
+    // --- MATEMÁTICA ---
+    const yearsUntilRetirement = Math.max(0, RETIREMENT_AGE - age);
+    const trappedRatio         = trapped / TOTAL_HOURS;
+    const lostYears            = yearsUntilRetirement * trappedRatio;
+
+    let constructorHours = Math.max(0, TOTAL_HOURS - BIO_MAINTENANCE - trapped);
+    if (constructorHours < 0.05) constructorHours = 0;
+    const efficiencyFactor = constructorHours / TOTAL_HOURS;
+    const effectiveYears   = yearsUntilRetirement * efficiencyFactor;
+
+    resultYears.innerText = effectiveYears.toFixed(1);
+
+    // --- STATS SECUNDARIAS (conexión con la revelación del 7% del capítulo) ---
+    const lifePct = (effectiveYears / LIFE_EXPECTANCY) * 100;
+    resultPct.innerText  = lifePct.toFixed(1);
+    resultLost.innerText = lostYears.toFixed(1);
+
+    // --- COLOR DINÁMICO DEL NÚMERO HÉROE (feedback emocional inmediato) ---
+    let heroColor;
+    if (trapped <= 2)      heroColor = 'text-emerald-600';
+    else if (trapped <= 5) heroColor = 'text-orange-500';
+    else                   heroColor = 'text-red-600';
+
+    // Guardar para la tarjeta compartible
+    window.lastResult = { age, effectiveYears, lifePct, trapped };
+    resultYears.className = `text-8xl md:text-9xl font-display font-black ${heroColor} tracking-tighter number-transition pulse-soft`;
+
+    // --- ETAPA DE VIDA (personalización del diagnóstico) ---
+    let lifeStage;
+    if (age < 18)      lifeStage = 'Etapa de Fundamentos (14–17)';
+    else if (age < 40) lifeStage = 'Etapa de Construcción (18–39)';
+    else               lifeStage = 'Etapa de Maestría (40–64)';
+    const stageTag = `<span class="inline-block text-[10px] font-bold uppercase tracking-wider bg-white/60 border border-current/20 rounded-full px-2 py-0.5 mb-2 opacity-80">${lifeStage}</span><br>`;
+
+    // --- SLIDER CONTEXT ---
+    trappedDisplay.innerText = trapped.toFixed(1);
+    const msg = sliderContextMessages.find(m => trapped <= m.max) || sliderContextMessages[sliderContextMessages.length - 1];
+    trappedContext.innerText = msg.text;
+
+    // --- DIAGNÓSTICO ---
+    if (trapped <= 2) {
+      diagnosisBox.className  = "rounded-xl border p-4 text-left transition-all duration-500 bg-emerald-50 border-emerald-200";
+      diagnosisTitle.className = "font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2 text-emerald-800";
+      diagnosisTitle.innerHTML = "<span>✅</span> Diagnóstico: Excelente alineación";
+      diagnosisText.innerHTML  = stageTag + `Solo cedes <strong>${lostYears.toFixed(1)} años</strong> al entorno. Tu franja verde es poderosa. Estás viviendo tus declaraciones de identidad mientras construyes cimientos sólidos. Eso es exactamente lo que tu Franja Verde propone: construir viviendo.`;
+      diagnosisText.className  = "text-sm leading-relaxed text-emerald-900";
+
+    } else if (trapped <= 5) {
+      diagnosisBox.className  = "rounded-xl border p-4 text-left transition-all duration-500 bg-orange-50 border-orange-200";
+      diagnosisTitle.className = "font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2 text-orange-800";
+      diagnosisTitle.innerHTML = "<span>⚠️</span> Precaución: tiempo en riesgo";
+      diagnosisText.innerHTML  = stageTag + `Esas <strong>${trapped} horas diarias</strong> en fuga se acumulan en silencio. Estás cediendo <strong>${lostYears.toFixed(1)} años</strong> que podrían expresar quién eres y construir tus cimientos. La comodidad sin propósito tiene un costo invisible.`;
+      diagnosisText.className  = "text-sm leading-relaxed text-orange-900";
+
+    } else if (trapped <= 9) {
+      diagnosisBox.className  = "rounded-xl border p-4 text-left transition-all duration-500 bg-red-50 border-red-200";
+      diagnosisTitle.className = "font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2 text-red-800";
+      diagnosisTitle.innerHTML = "<span>🚨</span> Alerta: pérdida significativa";
+      diagnosisText.innerHTML  = stageTag + `Tus <strong>${trapped} horas diarias</strong> en fuga están eliminando <strong>${lostYears.toFixed(1)} años completos</strong> de tu Franja Verde.<br><br><span class="font-bold">Tienes potencial real, pero gran parte de él se está evaporando. ¿Cuánto tiempo más puedes sostener este intercambio?</span>`;
+      diagnosisText.className  = "text-sm leading-relaxed text-red-900";
+
+    } else {
+      diagnosisBox.className  = "rounded-xl border p-4 text-left transition-all duration-500 bg-red-100 border-red-300";
+      diagnosisTitle.className = "font-bold text-sm uppercase tracking-wide mb-2 flex items-center gap-2 text-red-900";
+      diagnosisTitle.innerHTML = "<span>🔴</span> Punto crítico: tu franja verde casi desaparece";
+      diagnosisText.innerHTML  = stageTag + `<strong>${trapped} horas diarias</strong> en fuga están cediendo <strong>${lostYears.toFixed(1)} años completos</strong> de vida real. Tu franja verde es casi invisible — pero <strong>todavía está ahí, y es tuya</strong>.<br><br><span class="font-bold">Esto no es para generar culpa: es para generar acción. Cada hora que recuperes desde hoy es una hora de vida real. Empieza por una.</span>`;
+      diagnosisText.className  = "text-sm leading-relaxed text-red-900";
+    }
+
+    // --- BARRAS ---
+    const bioPctInternal       = (BIO_MAINTENANCE / TOTAL_HOURS) * 100;
+    const trappedPctInternal   = (trapped / TOTAL_HOURS) * 100;
+    const constructorPctInternal = constructorHours > 0
+      ? 100 - bioPctInternal - trappedPctInternal
+      : 0;
+
+    const pastPctAbsolute      = (age / LIFE_EXPECTANCY) * 100;
+    const activePctAbsolute    = (yearsUntilRetirement / LIFE_EXPECTANCY) * 100;
+    const legacyPctAbsolute    = ((LIFE_EXPECTANCY - RETIREMENT_AGE) / LIFE_EXPECTANCY) * 100;
+
+    const bioPctAbsolute       = activePctAbsolute * (bioPctInternal / 100);
+    const trappedPctAbsolute   = activePctAbsolute * (trappedPctInternal / 100);
+    const constructorPctAbsolute = activePctAbsolute * (constructorPctInternal / 100);
+
+    barPast.style.width             = `${pastPctAbsolute}%`;
+    barActiveContainer.style.width  = `${activePctAbsolute}%`;
+    barLegacy.style.width           = `${legacyPctAbsolute}%`;
+    barBio.style.width              = `${bioPctInternal}%`;
+    barTrapped.style.width          = `${trappedPctInternal}%`;
+    barConstructor.style.width      = `${constructorPctInternal}%`;
+
+    // Efecto glow en la barra verde cuando es grande
+    if (constructorPctAbsolute > 8) {
+      barConstructor.classList.add('green-glow');
+    } else {
+      barConstructor.classList.remove('green-glow');
+    }
+
+    updateLabelVisibility(barPast,        pastPctAbsolute);
+    updateLabelVisibility(barBio,         bioPctAbsolute);
+    updateLabelVisibility(barTrapped,     trappedPctAbsolute);
+    updateLabelVisibility(barConstructor, constructorPctAbsolute);
+    updateLabelVisibility(barLegacy,      legacyPctAbsolute);
+  }
+
+  ageInput.addEventListener('input', calculate);
+  trappedSlider.addEventListener('input', calculate);
+  calculate();
+
+  // ===== TARJETA COMPARTIBLE =====
+  function openShareCard() {
+    renderShareCard();
+    document.getElementById('shareModal').showModal();
+  }
+
+  function renderShareCard() {
+    const r = window.lastResult;
+    if (!r) return;
+    const showAge = document.getElementById('showAgeToggle').checked;
+
+    // Línea superior: con o sin edad
+    document.getElementById('shareTopLine').innerText = showAge
+      ? `Tengo ${r.age} años. Hice la cuenta y esto me queda:`
+      : 'Hice la cuenta de mi vida. Y esto me queda:';
+
+    // Número héroe con color según severidad
+    const num = document.getElementById('shareNumber');
+    num.innerText = r.effectiveYears.toFixed(1);
+    num.style.color = r.trapped <= 2 ? '#34d399' : (r.trapped <= 5 ? '#fb923c' : '#f87171');
+
+    // Frase remate según severidad
+    const phrase = r.trapped <= 2
+      ? '"Y sé exactamente qué hacer con ellos."'
+      : (r.trapped <= 5 ? '"Y la arena sigue cayendo."' : '"Y apenas acabo de darme cuenta."');
+    document.getElementById('sharePhrase').innerText = phrase;
+  }
+
+  async function captureShareCard() {
+    if (typeof html2canvas === 'undefined') throw new Error('html2canvas no disponible');
+    // Esperar a que las fuentes web estén listas: evita que el número se dibuje encima del texto
+    if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+    return html2canvas(document.getElementById('shareCard'), { backgroundColor: '#020617', scale: 3, useCORS: true });
+  }
+
+  async function downloadShareCard() {
+    try {
+      const canvas = await captureShareCard();
+      const link = document.createElement('a');
+      link.download = 'mi-franja-verde.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (e) { alert('Toma una captura de pantalla de la tarjeta 📸'); }
+  }
+
+  async function shareCardNative() {
+    try {
+      const canvas = await captureShareCard();
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      const file = new File([blob], 'mi-franja-verde.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'Mi Franja Verde',
+          text: '¿Cuánta vida te queda a ti? ⏳ El Reloj Invisible'
+        });
+      } else {
+        // Escritorio o navegador sin Web Share: caer a descarga
+        downloadShareCard();
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return; // el usuario canceló el menú de compartir
+      alert('Toma una captura de pantalla de la tarjeta 📸');
+    }
+  }
+</script>
+
+<!-- ===== TARJETA COMPARTIBLE ===== -->
+<dialog id="shareModal" class="p-0 rounded-3xl shadow-2xl backdrop:bg-slate-900/70 max-w-md w-full m-auto bg-transparent">
+  <div class="bg-white rounded-3xl overflow-hidden">
+
+    <!-- Toggle mostrar edad -->
+    <div class="flex items-center justify-between px-5 py-3 bg-slate-50 border-b border-slate-100">
+      <label for="showAgeToggle" class="text-xs font-bold text-slate-600 select-none cursor-pointer">Mostrar mi edad en la tarjeta</label>
+      <input type="checkbox" id="showAgeToggle" checked onchange="renderShareCard()"
+        class="w-9 h-5 accent-emerald-600 cursor-pointer">
+    </div>
+
+    <!-- LA TARJETA (zona de captura) -->
+    <div id="shareCard" class="bg-slate-950 px-8 py-10 text-center" style="background: radial-gradient(ellipse at top, #1e293b 0%, #020617 65%);">
+      <div class="text-3xl mb-4">⏳</div>
+      <p id="shareTopLine" class="text-slate-300 font-display font-bold text-lg tracking-wide uppercase mb-1">Tengo 30 años.</p>
+      <div style="padding: 4px 0 8px 0;">
+        <span id="shareNumber" class="font-display font-black text-emerald-400 tracking-tighter" style="font-size: 5.5rem; line-height: 1.1; display: inline-block;">5.1</span>
+      </div>
+      <p class="text-slate-200 font-bold text-xl" style="margin: 0 0 16px 0;">años de vida real</p>
+      <p id="sharePhrase" class="text-slate-400 italic text-base mb-6">"Y la arena sigue cayendo."</p>
+      <p class="text-emerald-400 font-bold text-sm mb-5">¿Cuánta vida te queda a ti?</p>
+      <div class="border-t border-slate-700/60 pt-4">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">⏳ El Reloj Invisible · <span class="text-slate-400">¿Problema de Ricos?</span></p>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="flex gap-2 p-4 bg-slate-50">
+      <button id="nativeShareBtn" onclick="shareCardNative()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl px-4 py-2.5 transition-colors">📤 Compartir</button>
+      <button onclick="downloadShareCard()" class="flex-1 bg-slate-700 hover:bg-slate-800 text-white font-bold text-sm rounded-xl px-4 py-2.5 transition-colors">⬇️ Descargar</button>
+      <button onclick="document.getElementById('shareModal').close()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-sm rounded-xl px-4 py-2.5 transition-colors">Cerrar</button>
+    </div>
+    <p class="text-[10px] text-slate-400 text-center pb-3 px-4">Si la descarga no funciona en tu dispositivo, toma una captura de pantalla de la tarjeta.</p>
+  </div>
+</dialog>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+</body>
+</html>
