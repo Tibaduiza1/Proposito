@@ -23,7 +23,7 @@
           colors: {
             'brand-dark': '#0f172a',
             'brand-bio': '#64748b',
-            'brand-accent': '#10b981',
+            'brand-accent': '#A8791F',
             'brand-trapped': '#ef4444',
             'brand-legacy': '#6366f1',
           }
@@ -34,7 +34,7 @@
 
   <style>
     body {
-      background: linear-gradient(160deg, #f1f5f9 0%, #e2e8f0 60%, #dde1e9 100%);
+      background: linear-gradient(160deg, #f5f3ee 0%, #e8e4da 60%, #ddd6c8 100%);
       min-height: 100vh;
     }
 
@@ -46,9 +46,9 @@
     }
 
     .intro-card {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      background: linear-gradient(135deg, #163a38 0%, #0A2A2A 100%);
       border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.4);
+      box-shadow: 0 20px 40px -10px rgba(10, 42, 42, 0.4);
     }
 
     /* Patrón para Mantenimiento Biológico */
@@ -72,6 +72,12 @@
     }
 
     /* Slider personalizado */
+    input[type=range] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background: transparent;
+    }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
       height: 24px; width: 24px;
@@ -84,6 +90,22 @@
     }
     input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
     input[type=range]::-webkit-slider-runnable-track {
+      width: 100%; height: 6px;
+      cursor: pointer;
+      background: #e2e8f0;
+      border-radius: 99px;
+    }
+    input[type=range]::-moz-range-thumb {
+      height: 24px; width: 24px;
+      border-radius: 50%;
+      border: none;
+      background: #ef4444;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    input[type=range]::-moz-range-thumb:hover { transform: scale(1.1); }
+    input[type=range]::-moz-range-track {
       width: 100%; height: 6px;
       cursor: pointer;
       background: #e2e8f0;
@@ -396,7 +418,7 @@
 
         <!-- Botón compartir -->
         <button id="shareBtn" onclick="openShareCard()"
-          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-xl px-4 py-3 transition-colors flex items-center justify-center gap-2 shadow-lg">
+          class="w-full bg-[#0F3B3A] hover:bg-[#A8791F] text-white hover:text-[#1B1508] font-bold text-sm rounded-xl px-4 py-3 transition-colors flex items-center justify-center gap-2 shadow-lg">
           📸 Compartir mi resultado
         </button>
 
@@ -584,7 +606,7 @@
     <p class="text-sm text-slate-500 mb-5 max-w-md mx-auto">
       Regresa al Capítulo 3 de <em>Problema de Ricos</em> para descubrir cómo expandir tu Franja Verde y qué hacer con cada hora recuperada.
     </p>
-    <a href="/" class="inline-flex items-center justify-center bg-slate-900 text-white px-8 py-3.5 rounded-full font-bold text-sm hover:bg-slate-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 group">
+    <a href="/" class="inline-flex items-center justify-center bg-[#0F3B3A] text-white px-8 py-3.5 rounded-full font-bold text-sm hover:bg-[#A8791F] hover:text-[#1B1508] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 group">
       <span>Continuar en el libro</span>
       <span class="ml-2 group-hover:translate-x-1 transition-transform">→</span>
     </a>
@@ -618,7 +640,7 @@
       (salud, autonomía económica, conexiones, habilidades), no lo cuentes aquí.
     </p>
     <form method="dialog">
-      <button class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl hover:bg-slate-700 transition">
+      <button class="w-full bg-[#0F3B3A] text-white font-bold py-2.5 rounded-xl hover:bg-[#A8791F] hover:text-[#1B1508] transition">
         Entendido, cerrar
       </button>
     </form>
