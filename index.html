@@ -31,8 +31,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
 <script>
-  /* ─────────── EDITA SOLO ESTAS DOS LÍNEAS ─────────── */
-  const ENLACE_AMAZON = "https://www.amazon.com/dp/XXXXXXXXXX";
+  /* ─────────── EDITA SOLO ESTAS LÍNEAS ─────────── */
+  const ENLACE_FISICO_CO     = "https://www.autoreseditores.com/libro/35444/roberto-antonio-leon-tibaduiza/problema-de-ricos.html";
+  const ENLACE_AMAZON_DIGITAL = "";   // Kindle — pendiente
+  const ENLACE_AMAZON_PASTA   = "";   // Pasta blanda, otros países — pendiente
   const ENLACE_RELOJ  = "";   // opcional: enlace a El Reloj Invisible
 </script>
 
@@ -146,6 +148,22 @@ a:focus-visible{outline:2px solid var(--oro);outline-offset:4px}
   font-family:var(--serif);font-size:2.1rem;color:var(--oro)}
 .retrato img{width:100%;height:100%;object-fit:cover}
 
+/* ── elige tu edición ── */
+.grid-ediciones{display:grid;gap:16px;margin:32px 0 0;max-width:560px;margin-left:auto;margin-right:auto}
+@media(min-width:700px){.grid-ediciones{grid-template-columns:repeat(3,1fr);gap:18px}}
+.edicion{
+  display:flex;flex-direction:column;align-items:center;gap:.35em;text-align:center;
+  padding:1.6em 1.2em;background:var(--marfil-alto);border:1px solid var(--hairline);
+  text-decoration:none;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+.edicion:hover{transform:translateY(-3px);border-color:var(--oro);box-shadow:0 14px 28px -18px rgba(15,59,58,.4)}
+.edicion-ico{font-size:1.6rem;line-height:1}
+.edicion-tit{font-family:var(--serif);font-weight:600;color:var(--petroleo);font-size:1.02rem}
+.edicion-sub{font-size:.82rem;color:var(--gris)}
+.edicion--pronto{cursor:default;opacity:.55}
+.edicion--pronto:hover{transform:none;border-color:var(--hairline);box-shadow:none}
+.edicion--pronto .edicion-sub{color:var(--oro)}
+
 .cierre{text-align:center}
 .cierre .infinito{margin:0 auto 26px}
 .cierre p{max-width:38ch;margin-left:auto;margin-right:auto}
@@ -178,8 +196,8 @@ footer{padding:28px 0 96px;text-align:center;font-size:.78rem;color:var(--gris)}
       <p class="ojo">Edición en español</p>
       <h1>«NO IMPORTA LA EDAD QUE TENGAS»<br><span class="dorado">Los interrogantes sobre tu propósito en esta vida siempre llegan.</span></h1>
       <p class="sub">Te presentamos un libro sobre: qué es vivir con propósito, por qué es importante sostenerlo y cómo se ve el tuyo en la práctica. Con la ciencia detrás.</p>
-      <a class="cta" data-cta="amazon" href="#" target="_blank" rel="noopener">Conseguir el libro en Amazon</a>
-      <p class="bajo-cta">Disponible en Amazon · empieza a leerlo en un minuto</p>
+      <a class="cta" href="#ediciones">Conseguir el libro</a>
+      <p class="bajo-cta">Impreso, digital (Kindle) y pasta blanda internacional</p>
     </div>
 
     <!-- Reproducción de la portada. Puedes reemplazar todo este bloque por: <img class="mini" src="portada.jpg" alt="Portada"> -->
@@ -233,7 +251,31 @@ footer{padding:28px 0 96px;text-align:center;font-size:.78rem;color:var(--gris)}
       <li><span class="m">✦</span><div><h3>Herramientas con respaldo</h3><p>Métodos basados en evidencia, no en frases motivacionales.</p></div></li>
       <li><span class="m">✦</span><div><h3>El tiempo que te queda</h3><p>La franja donde todavía decides, y cómo dejar de gastarla por defecto.</p></div></li>
     </ul>
-    <p class="centro" style="margin-top:42px"><a class="cta" data-cta="amazon" href="#" target="_blank" rel="noopener">Quiero el libro</a></p>
+  </div>
+</section>
+
+<!-- ══ ELIGE TU EDICIÓN ══ -->
+<section class="bloque bloque--papel centro" id="ediciones">
+  <div class="env">
+    <p class="ojo">Elige tu edición</p>
+    <h2>Consíguelo en el formato que prefieras.</h2>
+    <div class="grid-ediciones">
+      <a class="edicion" data-cta="fisico-co" href="#" target="_blank" rel="noopener">
+        <span class="edicion-ico">📖</span>
+        <span class="edicion-tit">Impreso — Colombia</span>
+        <span class="edicion-sub">Envío nacional</span>
+      </a>
+      <a class="edicion edicion--pronto" data-cta="amazon-digital" href="#" aria-disabled="true">
+        <span class="edicion-ico">📱</span>
+        <span class="edicion-tit">Digital — Kindle</span>
+        <span class="edicion-sub">Próximamente</span>
+      </a>
+      <a class="edicion edicion--pronto" data-cta="amazon-pasta" href="#" aria-disabled="true">
+        <span class="edicion-ico">📗</span>
+        <span class="edicion-tit">Pasta blanda — otros países</span>
+        <span class="edicion-sub">Próximamente</span>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -258,7 +300,7 @@ footer{padding:28px 0 96px;text-align:center;font-size:.78rem;color:var(--gris)}
     <p style="font-family:var(--serif);font-style:italic;font-size:1.05rem;color:#9FB2B0;margin:0 auto .5em;max-width:24ch">Buscar propósito es únicamente ¿problema de ricos?</p>
     <h2 style="max-width:16ch;margin:0 auto .5em">Definitivamente no.</h2>
     <p class="remate" style="margin:0 auto">Pero ignorarlo es un lujo que no te puedes dar.</p>
-    <p style="margin-top:1.9em"><a class="cta" data-cta="amazon" href="#" target="_blank" rel="noopener">Conseguir el libro en Amazon</a></p>
+    <p style="margin-top:1.9em"><a class="cta" href="#ediciones">Conseguir el libro</a></p>
     <p style="margin-top:1.6em"><a data-cta="reloj" href="#" style="color:#8FA3A1;font-size:.85rem" hidden>Calcular mi tiempo en El Reloj Invisible →</a></p>
   </div>
 </section>
@@ -267,12 +309,25 @@ footer{padding:28px 0 96px;text-align:center;font-size:.78rem;color:var(--gris)}
 
 <div class="barra-movil">
   <span>¿Problema de ricos?</span>
-  <a class="cta" data-cta="amazon" href="#" target="_blank" rel="noopener">Comprar</a>
+  <a class="cta" href="#ediciones">Comprar</a>
 </div>
 
 <script>
 (function(){
-  document.querySelectorAll('[data-cta="amazon"]').forEach(a=>a.href=ENLACE_AMAZON);
+  document.querySelector('[data-cta="fisico-co"]').href=ENLACE_FISICO_CO;
+
+  function conecta(selector,enlace){
+    const a=document.querySelector(selector);
+    if(enlace){
+      a.href=enlace;a.target='_blank';a.rel='noopener';
+      a.classList.remove('edicion--pronto');a.removeAttribute('aria-disabled');
+    }else{
+      a.addEventListener('click',e=>e.preventDefault());
+    }
+  }
+  conecta('[data-cta="amazon-digital"]',ENLACE_AMAZON_DIGITAL);
+  conecta('[data-cta="amazon-pasta"]',ENLACE_AMAZON_PASTA);
+
   const r=document.querySelector('[data-cta="reloj"]');
   if(ENLACE_RELOJ){r.href=ENLACE_RELOJ;r.hidden=false;}
   document.getElementById('anio').textContent=new Date().getFullYear();
