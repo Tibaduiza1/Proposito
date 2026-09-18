@@ -268,12 +268,12 @@ footer{padding:28px 0 96px;text-align:center;font-size:.78rem;color:var(--gris)}
       <a class="edicion edicion--pronto" data-cta="amazon-pasta" href="#" aria-disabled="true">
         <span class="edicion-ico">📗</span>
         <span class="edicion-tit">Físico — Amazon</span>
-        <span class="edicion-sub">Próximamente</span>
+        <span class="edicion-sub" data-sub-listo="Envíos internacionales">Próximamente</span>
       </a>
       <a class="edicion edicion--pronto" data-cta="amazon-digital" href="#" aria-disabled="true">
         <span class="edicion-ico">📱</span>
         <span class="edicion-tit">Digital — Kindle</span>
-        <span class="edicion-sub">Próximamente</span>
+        <span class="edicion-sub" data-sub-listo="Disponible en Amazon">Próximamente</span>
       </a>
     </div>
   </div>
@@ -320,6 +320,8 @@ footer{padding:28px 0 96px;text-align:center;font-size:.78rem;color:var(--gris)}
     if(enlace){
       a.href=enlace;a.target='_blank';a.rel='noopener';
       a.classList.remove('edicion--pronto');a.removeAttribute('aria-disabled');
+      const sub=a.querySelector('.edicion-sub');
+      sub.textContent=sub.dataset.subListo;
     }else{
       a.addEventListener('click',e=>e.preventDefault());
     }
