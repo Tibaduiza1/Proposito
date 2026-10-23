@@ -427,10 +427,10 @@
             <label for="ageInput" class="label"><span class="step-num">I.</span>Tu edad</label>
           </div>
           <div class="age-row">
-            <input type="number" id="ageInput" value="30" min="14" max="60" inputmode="numeric" placeholder="30">
+            <input type="number" id="ageInput" value="30" min="14" max="110" inputmode="numeric" placeholder="30">
             <span class="unit">años</span>
           </div>
-          <p id="ageError" class="hint hidden">Ingresa una edad entre 14 y 60 años.</p>
+          <p id="ageError" class="hint hidden">Ingresa tu edad (a partir de 14 años).</p>
         </div>
 
         <div class="step">
@@ -451,18 +451,18 @@
         <div class="ring-wrap">
           <div class="ring">
             <span id="resultYears" class="display">0.0</span>
-            <span class="unit-line">años de vida real</span>
+            <span class="unit-line" id="resultUnit">años de vida real</span>
           </div>
         </div>
 
         <div class="stats">
           <div class="stat green">
-            <div class="n"><span id="resultPct">0</span>%</div>
-            <div class="label">de tu vida total</div>
+            <div class="n"><span id="resultPct">0</span><span id="pctSign">%</span></div>
+            <div class="label" id="statALabel">de tu vida total</div>
           </div>
           <div class="stat ember">
             <div class="n"><span id="resultLost">0</span></div>
-            <div class="label">años en fuga</div>
+            <div class="label" id="statBLabel">años en fuga</div>
           </div>
         </div>
 
@@ -490,28 +490,33 @@
           <div id="barLegacy" class="seg seg-legacy" style="width: 18.75%"><span>Legado</span></div>
         </div>
 
-        <span class="tick below edge-l" style="left: 0">0</span>
-        <span class="tick below" style="left: 81.25%">65</span>
-        <span class="tick below edge-r" style="left: 100%">80</span>
+        <span class="tick below edge-l" id="tickStart" style="left: 0">0</span>
+        <span class="tick below" id="tick65" style="left: 81.25%">65</span>
+        <span class="tick below edge-r" id="tickEnd" style="left: 100%">80</span>
       </div>
 
       <div class="legend">
-        <span><i class="sw" style="background:#3a2a1f"></i>Vivido</span>
+        <span id="lgPast"><i class="sw" style="background:#3a2a1f"></i>Vivido</span>
         <span><i class="sw seg-bio"></i>Tiempo básico</span>
         <span><i class="sw seg-fuga"></i>Tiempo en fuga</span>
         <span style="color: var(--green); font-weight: 600"><i class="sw" style="background: var(--green)"></i>Tu Franja Verde</span>
-        <span><i class="sw" style="background: rgba(213,161,60,.2)"></i>Legado (65+)</span>
+        <span id="lgLegacy"><i class="sw" style="background: rgba(213,161,60,.2)"></i>Legado (65+)</span>
       </div>
 
       <details class="more method">
         <summary>¿Cómo se calcula?</summary>
         <div class="more-body">
-          <ol class="calc-steps">
+          <ol class="calc-steps" id="methodYears">
             <li>Contamos los años que te quedan hasta los 65, la etapa de la vida con más energía para construir: <strong id="mYears">35 años</strong>.</li>
             <li>A cada día de 24 horas le restamos 11.5 horas para lo básico (dormir, comer, asearte) y tus horas perdidas. Lo que queda es tu tiempo libre de verdad: <strong id="mHours">6.5 horas al día</strong>.</li>
             <li>Convertimos ese tiempo diario en años completos: <strong id="mFormula">35 × 6.5 ÷ 24 = 9.5 años</strong>.</li>
           </ol>
-          <p class="aside">El porcentaje compara esos años con una vida de 80 años.</p>
+          <ol class="calc-steps hidden" id="methodDays">
+            <li>Desde los 65 no contamos años hacia adelante: miramos lo que tienes cada día.</li>
+            <li>A cada día de 24 horas le restamos 11.5 horas para lo básico (dormir, comer, asearte) y tus horas perdidas: te quedan <strong id="mdHours">6.5 horas al día</strong>.</li>
+            <li>Sumamos esas horas a lo largo de un año: <strong id="mdFormula">6.5 × 365 ÷ 24 = 99 días completos</strong>.</li>
+          </ol>
+          <p class="aside" id="methodAside">El porcentaje compara esos años con una vida de 80 años.</p>
         </div>
       </details>
     </div>
@@ -607,7 +612,7 @@
       <span class="sc-orn" style="bottom:-11px; right:-11px">∞</span>
       <p id="shareTopLine">Tengo 30 años. Hice la cuenta y esto me queda:</p>
       <div><span id="shareNumber">5.1</span></div>
-      <p class="sc-unit">años de vida real</p>
+      <p class="sc-unit" id="shareUnit">años de vida real</p>
       <p id="shareLegacy" class="sc-legacy hidden">y 15 años de legado por delante</p>
       <p id="sharePhrase">"Y la arena sigue cayendo."</p>
       <p class="sc-ask">¿Cuánta vida te queda a ti?</p>
@@ -628,6 +633,8 @@
   const TOTAL_HOURS     = 24;
   const BIO_MAINTENANCE = 11.5;
   const MATURE_AGE      = 55;   // desde aquí la ventana hasta los 65 es corta: mensaje honesto pero compasivo
+  const MIN_AGE         = 14;
+  const MAX_AGE         = 110;
   const LEGACY_YEARS    = LIFE_EXPECTANCY - RETIREMENT_AGE;
 
   // DOM refs
@@ -652,6 +659,7 @@
   const mYears         = document.getElementById('mYears');
   const mHours         = document.getElementById('mHours');
   const mFormula       = document.getElementById('mFormula');
+  const $ = id => document.getElementById(id);
 
   // Hasta que la persona mueva el control, el resultado se muestra en neutro
   let sliderTouched = false;
@@ -672,10 +680,20 @@
   // Desde los 55: el número sigue siendo real, pero se encuadra hacia lo que viene
   const matureDiagnoses = {
     good: { title: 'Estás construyendo tu legado',
-            text: (h, l, y, e) => `Te quedan ${y} años antes de los 65 y los estás viviendo con intención: <strong>${e} años</strong> de vida real. Eso no es poco. Es el puente hacia tus <strong>${LEGACY_YEARS} años de legado</strong>, donde lo que construyas hoy te dará libertad para vivir a tu manera.` },
+            text: (h, l, y, e) => `${quedan(y).replace('te', 'Te')} antes de los 65 y los estás viviendo con intención: <strong>${e} años</strong> de vida real. Eso no es poco. Es el puente hacia tus <strong>${LEGACY_YEARS} años de legado</strong>, donde lo que construyas hoy te dará libertad para vivir a tu manera.` },
     rest: { title: 'Lo que hagas ahora vale doble',
-            text: (h, l, y, e) => `Antes de los 65 te quedan ${y} años, y <strong>${e}</strong> de ellos son tiempo realmente tuyo. Es poco, y es real. Pero tu historia no termina ahí: después vienen <strong>${LEGACY_YEARS} años de legado</strong>, y lo que empieces hoy decide cómo los vivirás.<br><br><strong>Nunca es tarde para empezar. Lo único tarde es seguir esperando.</strong>` }
+            text: (h, l, y, e) => `Antes de los 65 ${quedan(y)}, y <strong>${e}</strong> de ellos son tiempo realmente tuyo. Es poco, y es real. Pero tu historia no termina ahí: después vienen <strong>${LEGACY_YEARS} años de legado</strong>, y lo que empieces hoy decide cómo los vivirás.<br><br><strong>Nunca es tarde para empezar. Lo único tarde es seguir esperando.</strong>` }
   };
+
+  // Desde los 65 no hay cuenta regresiva: se mide el tiempo propio de cada día
+  const legacyDiagnoses = {
+    good: { title: 'Tu legado está en marcha',
+            text: (h, d) => `Cada día tienes <strong>${h} horas</strong> que son tuyas: <strong>${d} días completos al año</strong>, y los estás viviendo con intención. Tienes algo que nadie más tiene: una vida entera de experiencia.<br><br>La pregunta que te toca ahora es otra: <strong>¿qué sabes tú que el mundo no debería perder?</strong>` },
+    rest: { title: 'Tienes más tiempo del que crees',
+            text: (h, d, t) => `Cada día tienes <strong>${h} horas</strong> que son tuyas: <strong>${d} días completos al año</strong>. Y cada hora que recuperes de tus ${t} horas en fuga te suma 15 días más al año.<br><br>Tienes algo que nadie más tiene: una vida entera de experiencia. La pregunta que te toca ahora es otra: <strong>¿qué sabes tú que el mundo no debería perder?</strong>` }
+  };
+
+  const quedan = n => n === 1 ? 'te queda 1 año' : `te quedan ${n} años`;
 
   function updateLabelVisibility(element, segmentPctOfLife) {
     const label = element.querySelector('span');
@@ -693,7 +711,7 @@
     trappedDisplay.innerText = trapped.toFixed(1);
 
     // Validación
-    if (isNaN(age) || age < 14 || age > 60) {
+    if (isNaN(age) || age < MIN_AGE || age > MAX_AGE) {
       ageError.classList.remove('hidden');
       calcSection.classList.add('locked');
       ageInput.classList.add('invalid');
@@ -702,6 +720,10 @@
     ageError.classList.add('hidden');
     calcSection.classList.remove('locked');
     ageInput.classList.remove('invalid');
+
+    const legacy = age >= RETIREMENT_AGE;
+    setMode(legacy);
+    if (legacy) { renderLegacy(age, trapped); return; }
 
     // --- MATEMÁTICA ---
     const yearsUntilRetirement = Math.max(0, RETIREMENT_AGE - age);
@@ -789,6 +811,66 @@
     updateLabelVisibility(barLegacy,      legacyPctAbsolute);
   }
 
+  // Cambia los textos fijos entre la vista por años (<65) y la vista por días (65+)
+  function setMode(legacy) {
+    $('resultUnit').innerText = legacy ? 'días al año de vida real' : 'años de vida real';
+    $('pctSign').classList.toggle('hidden', legacy);
+    $('statALabel').innerText = legacy ? 'tuyas cada día' : 'de tu vida total';
+    $('statBLabel').innerText = legacy ? 'en fuga cada día' : 'años en fuga';
+    $('methodYears').classList.toggle('hidden', legacy);
+    $('methodDays').classList.toggle('hidden', !legacy);
+    $('methodAside').classList.toggle('hidden', legacy);
+    $('lgPast').classList.toggle('hidden', legacy);
+    $('lgLegacy').classList.toggle('hidden', legacy);
+    $('tick65').classList.toggle('hidden', legacy);
+    $('tickStart').innerText = legacy ? '0 h' : '0';
+    $('tickEnd').innerText   = legacy ? '24 h' : '80';
+  }
+
+  // 65+: la barra muestra un día de 24 horas y el resultado se da en días al año
+  function renderLegacy(age, trapped) {
+    let constructorHours = Math.max(0, TOTAL_HOURS - BIO_MAINTENANCE - trapped);
+    if (constructorHours < 0.05) constructorHours = 0;
+    const daysPerYear = Math.round(constructorHours * 365 / TOTAL_HOURS);
+    const fmt = n => n.toFixed(1).replace(/\.0$/, '');
+
+    resultYears.innerText = daysPerYear;
+    resultPct.innerText  = `${fmt(constructorHours)} h`;
+    resultLost.innerText = `${fmt(trapped)} h`;
+    $('mdHours').innerText   = `${fmt(constructorHours)} horas al día`;
+    $('mdFormula').innerText = `${fmt(constructorHours)} × 365 ÷ 24 = ${daysPerYear} días completos`;
+
+    window.lastResult = { age, trapped, legacy: true, daysPerYear };
+
+    const level = trapped <= 2 ? 'good' : 'mid';
+    if (sliderTouched) {
+      resultYears.dataset.level = level;
+      const d = legacyDiagnoses[level === 'good' ? 'good' : 'rest'];
+      diagnosisBox.dataset.level = level;
+      diagnosisTitle.innerText   = d.title;
+      diagnosisText.innerHTML    = `<span class="stage">Etapa de Legado (65+)</span>` + d.text(fmt(constructorHours), daysPerYear, fmt(trapped));
+    }
+
+    const bioPct     = (BIO_MAINTENANCE / TOTAL_HOURS) * 100;
+    const trappedPct = (trapped / TOTAL_HOURS) * 100;
+    const ownPct     = constructorHours > 0 ? 100 - bioPct - trappedPct : 0;
+    barPast.style.width            = '0%';
+    barLegacy.style.width          = '0%';
+    barActiveContainer.style.width = '100%';
+    barBio.style.width             = `${bioPct}%`;
+    barTrapped.style.width         = `${trappedPct}%`;
+    barConstructor.style.width     = `${ownPct}%`;
+
+    tickToday.style.left = '50%';
+    tickToday.innerText  = 'Un día de tu vida';
+
+    updateLabelVisibility(barPast,        0);
+    updateLabelVisibility(barLegacy,      0);
+    updateLabelVisibility(barBio,         bioPct);
+    updateLabelVisibility(barTrapped,     trappedPct);
+    updateLabelVisibility(barConstructor, ownPct);
+  }
+
   ageInput.addEventListener('input', calculate);
   trappedSlider.addEventListener('input', () => { sliderTouched = true; calculate(); });
   calculate();
@@ -807,6 +889,19 @@
     const showAge = document.getElementById('showAgeToggle').checked;
 
     // Línea superior: con o sin edad
+    if (r.legacy) {
+      document.getElementById('shareTopLine').innerText = showAge
+        ? `Tengo ${r.age} años. Hice la cuenta y esto es mío:`
+        : 'Hice la cuenta. Y esto es mío:';
+      const n = document.getElementById('shareNumber');
+      n.innerText = r.daysPerYear;
+      n.style.color = r.trapped <= 2 ? '#86B48C' : '#D5A13C';
+      document.getElementById('shareUnit').innerText = 'días al año de vida real';
+      document.getElementById('shareLegacy').classList.add('hidden');
+      document.getElementById('sharePhrase').innerText = '"Y sé a quién se los quiero dar."';
+      return;
+    }
+    document.getElementById('shareUnit').innerText = 'años de vida real';
     document.getElementById('shareTopLine').innerText = showAge
       ? `Tengo ${r.age} años. Hice la cuenta y esto me queda:`
       : 'Hice la cuenta de mi vida. Y esto me queda:';
