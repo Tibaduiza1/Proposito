@@ -35,11 +35,10 @@
   const ENLACE_FISICO_CO     = "https://www.autoreseditores.com/libro/35444/roberto-antonio-leon-tibaduiza/problema-de-ricos.html";
   const ENLACE_AMAZON_DIGITAL = "https://www.amazon.com/dp/B0HK93LD7Q";   // Kindle
   const ENLACE_AMAZON_PASTA   = "https://www.amazon.com/dp/6280262243";   // Físico internacional
-  const ENLACE_RELOJ  = "/reloj/";   // El Reloj Invisible
 </script>
 
 <style>
-/* Colores tomados de la portada (los mismos de El Reloj Invisible) */
+/* Colores tomados de la portada */
 :root{
   --fondo:#0c0604;
   --fondo-calido:#170b06;
@@ -151,18 +150,6 @@ a:focus-visible{outline:1px solid var(--oro);outline-offset:4px}
 .dones .m{color:var(--oro-suave);font-family:var(--serif);line-height:1.6}
 .dones p{margin:0;color:var(--gris);font-size:.95rem;line-height:1.55}
 
-/* ── reloj: invitación ── */
-.reloj{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
-.aro{width:150px;height:150px;border-radius:50%;border:1px solid var(--linea);
-  box-shadow:0 0 0 7px rgba(213,161,60,.04),inset 0 0 40px rgba(213,161,60,.05);
-  display:grid;place-items:center;margin-bottom:22px;
-  font-family:var(--serif);font-style:italic;font-weight:700;font-size:3.4rem;color:var(--oro);line-height:1}
-.reloj p{max-width:40ch;color:var(--gris)}
-.enlace{display:inline-flex;align-items:center;gap:.5em;margin-top:.6em;
-  font-family:var(--sans);font-weight:600;font-size:.95rem;color:var(--oro);text-decoration:none;
-  padding:.85em 1.8em;border:1px solid var(--linea);transition:border-color .22s ease}
-.enlace:hover{border-color:var(--oro)}
-
 .autor{display:grid;gap:26px;justify-items:center;text-align:center}
 @media(min-width:700px){.autor{grid-template-columns:128px 1fr;gap:38px;align-items:start;justify-items:start;text-align:left}}
 .retrato{width:128px;height:128px;border-radius:50%;overflow:hidden;
@@ -264,19 +251,8 @@ footer{padding:28px 0 96px;text-align:center;font-size:.78rem;color:var(--gris)}
   </div>
 </section>
 
-<!-- ══ EL RELOJ INVISIBLE ══ -->
-<section class="bloque" data-cta="reloj-bloque" hidden>
-  <div class="env reloj">
-    <div class="aro">?</div>
-    <p class="ojo" style="margin-bottom:.6em">Herramienta gratuita</p>
-    <h2>¿Cuánto de tu tiempo es de verdad tuyo?</h2>
-    <p>Pon tu edad y una estimación de las horas que se te van cada día. El reloj te muestra lo que queda. Toma un minuto.</p>
-    <a class="enlace" data-cta="reloj" href="#">Calcular mi tiempo →</a>
-  </div>
-</section>
-
 <!-- ══ ELIGE TU EDICIÓN ══ -->
-<section class="bloque bloque--calido centro" id="ediciones">
+<section class="bloque centro" id="ediciones">
   <div class="env">
     <p class="ojo">Elige tu edición</p>
     <h2>Consíguelo en el formato que prefieras.</h2>
@@ -304,7 +280,7 @@ footer{padding:28px 0 96px;text-align:center;font-size:.78rem;color:var(--gris)}
 </section>
 
 <!-- ══ AUTOR ══ -->
-<section class="bloque">
+<section class="bloque bloque--calido">
   <div class="env autor">
     <div class="retrato"><img src="autor.jpg" alt="Antonio León Tibaduiza"></div>
     <div>
@@ -317,7 +293,7 @@ footer{padding:28px 0 96px;text-align:center;font-size:.78rem;color:var(--gris)}
 </section>
 
 <!-- ══ CIERRE ══ -->
-<section class="bloque bloque--calido cierre">
+<section class="bloque cierre">
   <div class="env">
     <div class="infinito centrado">∞</div>
     <p style="font-family:var(--serif);font-size:1.15rem;color:var(--crema);margin:0 auto .5em;max-width:none">Buscar propósito es únicamente…</p>
@@ -353,10 +329,6 @@ footer{padding:28px 0 96px;text-align:center;font-size:.78rem;color:var(--gris)}
   conecta('[data-cta="amazon-digital"]',ENLACE_AMAZON_DIGITAL);
   conecta('[data-cta="amazon-pasta"]',ENLACE_AMAZON_PASTA);
 
-  if(ENLACE_RELOJ){
-    document.querySelector('[data-cta="reloj"]').href=ENLACE_RELOJ;
-    document.querySelector('[data-cta="reloj-bloque"]').hidden=false;
-  }
   document.getElementById('anio').textContent=new Date().getFullYear();
   const els=document.querySelectorAll('.bloque,.portada');
   els.forEach(e=>e.classList.add('aparece'));
