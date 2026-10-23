@@ -141,9 +141,9 @@
     .step-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
     .step-num { font-family: var(--serif); font-style: italic; color: var(--gold-soft); margin-right: 8px; letter-spacing: 0; }
 
-    .age-row { display: flex; align-items: baseline; gap: 12px; }
+    .age-row { display: flex; align-items: baseline; gap: 10px; }
     #ageInput {
-      width: 100%;
+      width: 2.1ch;
       font-family: var(--serif); font-size: 56px; font-weight: 600; line-height: 1.1;
       color: var(--cream); background: transparent;
       border: 0; border-bottom: 1px solid var(--line);
@@ -155,13 +155,14 @@
     #ageInput::-webkit-outer-spin-button, #ageInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     #ageInput:focus { border-bottom-color: var(--gold); }
     #ageInput.invalid { color: var(--ember); border-bottom-color: var(--ember); }
-    .unit { font-family: var(--sans); font-size: 14px; color: var(--muted); }
-    .hint { font-family: var(--sans); font-size: 13px; color: var(--dim); margin-top: 8px; }
+    .unit { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--muted); }
+    .hint { font-family: var(--sans); font-size: 13px; color: var(--dim); margin-top: 10px; }
+    .def-line { font-family: var(--sans); font-size: 14px; line-height: 1.5; color: var(--muted); margin: 0 0 10px; }
     #ageError { color: var(--ember); }
 
     .text-btn {
       font-family: var(--sans); font-size: 13px; font-weight: 500;
-      background: none; border: 0; padding: 0; cursor: pointer;
+      background: none; border: 0; padding: 0; cursor: pointer; white-space: nowrap;
       color: var(--gold-soft); text-decoration: underline; text-underline-offset: 3px;
       text-decoration-color: var(--line);
     }
@@ -449,20 +450,21 @@
 
         <div class="step">
           <div class="step-head">
-            <label for="trappedSlider" class="label"><span class="step-num">II.</span>Horas en fuga al día</label>
+            <label for="trappedSlider" class="label"><span class="step-num">II.</span>Horas en fuga · estimado</label>
             <button type="button" class="text-btn" onclick="document.getElementById('modal-trapped').showModal()">¿Qué es esto?</button>
           </div>
+          <p class="def-line">Horas de un día normal que se te van sin darte nada a cambio: no las disfrutas, no te hacen crecer y no te acercan a la vida que quieres.</p>
           <div class="hours">
             <span id="trappedDisplay">6.0</span>
-            <span class="unit">horas / día</span>
+            <span class="unit">horas al día, aprox.</span>
           </div>
           <input type="range" id="trappedSlider" min="0" max="12.5" step="0.5" value="6" aria-describedby="trappedContext">
-          <div id="trappedContext">Mueve el control hasta tu número honesto.</div>
+          <div id="trappedContext">No tiene que ser exacto: basta un estimado honesto.</div>
 
           <details class="more">
             <summary>¿Qué número pongo?</summary>
             <div class="more-body">
-              <p>Piensa en un día normal, no en tu día ideal. ¿Cuántas horas se te van en cosas que no disfrutas, no te hacen crecer y no te acercan a la vida que quieres?</p>
+              <p>Piensa en un día normal, no en tu día ideal, y busca el caso que más se parezca al tuyo:</p>
               <ul class="examples">
                 <li><span>Tu trabajo te gusta y te hace crecer</span><b class="good">0–2 h</b></li>
                 <li><span>Tu trabajo está bien, pero no te llena</span><b class="mid">3–5 h</b></li>
