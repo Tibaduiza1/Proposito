@@ -386,6 +386,7 @@
     #shareTopLine { font-family: var(--serif); font-style: italic; font-size: 19px; color: #F0EDE6; margin: 0 0 10px; line-height: 1.4; }
     #shareNumber { font-family: var(--serif); font-style: italic; font-weight: 700; font-size: 96px; line-height: 1.1; display: inline-block; color: #D5A13C; }
     .sc-unit { font-family: var(--serif); font-size: 20px; color: #F0EDE6; margin: 0 0 18px; }
+    .sc-legacy { font-family: var(--serif); font-style: italic; font-size: 17px; color: #86B48C; margin: -10px 0 18px; }
     #sharePhrase { font-family: var(--serif); font-style: italic; font-size: 17px; color: #C9A055; margin: 0 0 26px; }
     .sc-ask { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #A89C8C; margin: 0 0 6px; }
     .sc-url { font-family: var(--sans); font-size: 15px; font-weight: 600; color: #F0EDE6; margin: 0; letter-spacing: .04em; }
@@ -607,6 +608,7 @@
       <p id="shareTopLine">Tengo 30 años. Hice la cuenta y esto me queda:</p>
       <div><span id="shareNumber">5.1</span></div>
       <p class="sc-unit">años de vida real</p>
+      <p id="shareLegacy" class="sc-legacy hidden">y 15 años de legado por delante</p>
       <p id="sharePhrase">"Y la arena sigue cayendo."</p>
       <p class="sc-ask">¿Cuánta vida te queda a ti?</p>
       <p class="sc-url">problemadericos.com/reloj</p>
@@ -625,6 +627,8 @@
   const RETIREMENT_AGE  = 65;
   const TOTAL_HOURS     = 24;
   const BIO_MAINTENANCE = 11.5;
+  const MATURE_AGE      = 55;   // desde aquí la ventana hasta los 65 es corta: mensaje honesto pero compasivo
+  const LEGACY_YEARS    = LIFE_EXPECTANCY - RETIREMENT_AGE;
 
   // DOM refs
   const ageInput       = document.getElementById('ageInput');
@@ -665,6 +669,14 @@
 
   // Oculta la etiqueta si no cabe completa en el ancho final del segmento
   const bar = document.querySelector('.bar');
+  // Desde los 55: el número sigue siendo real, pero se encuadra hacia lo que viene
+  const matureDiagnoses = {
+    good: { title: 'Estás construyendo tu legado',
+            text: (h, l, y, e) => `Te quedan ${y} años antes de los 65 y los estás viviendo con intención: <strong>${e} años</strong> de vida real. Eso no es poco. Es el puente hacia tus <strong>${LEGACY_YEARS} años de legado</strong>, donde lo que construyas hoy te dará libertad para vivir a tu manera.` },
+    rest: { title: 'Lo que hagas ahora vale doble',
+            text: (h, l, y, e) => `Antes de los 65 te quedan ${y} años, y <strong>${e}</strong> de ellos son tiempo realmente tuyo. Es poco, y es real. Pero tu historia no termina ahí: después vienen <strong>${LEGACY_YEARS} años de legado</strong>, y lo que empieces hoy decide cómo los vivirás.<br><br><strong>Nunca es tarde para empezar. Lo único tarde es seguir esperando.</strong>` }
+  };
+
   function updateLabelVisibility(element, segmentPctOfLife) {
     const label = element.querySelector('span');
     if (!label) return;
@@ -715,7 +727,8 @@
     resultLost.innerText = lostYears.toFixed(1);
 
     // Guardar para la tarjeta compartible
-    window.lastResult = { age, effectiveYears, lifePct, trapped };
+    const mature = age >= MATURE_AGE;
+    window.lastResult = { age, effectiveYears, lifePct, trapped, mature };
 
     // --- NIVEL (color del número héroe y diagnóstico) ---
     let level;
@@ -723,6 +736,8 @@
     else if (trapped <= 5) level = 'mid';
     else if (trapped <= 9) level = 'bad';
     else                   level = 'crit';
+    // Desde los 55 el número no se pinta de rojo: es corto por la edad, no por un fracaso
+    if (mature && level !== 'good') level = 'mid';
 
     if (sliderTouched) {
       resultYears.dataset.level = level;
@@ -733,10 +748,12 @@
       else if (age < 40) lifeStage = 'Etapa de Construcción (18–39)';
       else               lifeStage = 'Etapa de Maestría (40–64)';
 
-      const d = diagnoses[level];
+      const d = mature
+        ? (trapped <= 2 ? matureDiagnoses.good : matureDiagnoses.rest)
+        : diagnoses[level];
       diagnosisBox.dataset.level = level;
       diagnosisTitle.innerText   = d.title;
-      diagnosisText.innerHTML    = `<span class="stage">${lifeStage}</span>` + d.text(trapped, lostYears.toFixed(1));
+      diagnosisText.innerHTML    = `<span class="stage">${lifeStage}</span>` + d.text(trapped, lostYears.toFixed(1), yearsUntilRetirement, effectiveYears.toFixed(1));
     }
 
     // --- BARRAS ---
@@ -797,10 +814,13 @@
     // Número héroe con color según severidad
     const num = document.getElementById('shareNumber');
     num.innerText = r.effectiveYears.toFixed(1);
-    num.style.color = r.trapped <= 2 ? '#86B48C' : (r.trapped <= 5 ? '#D5A13C' : '#D26E4E');
+    num.style.color = r.trapped <= 2 ? '#86B48C' : (r.trapped <= 5 || r.mature ? '#D5A13C' : '#D26E4E');
+    document.getElementById('shareLegacy').classList.toggle('hidden', !r.mature);
 
     // Frase remate según severidad
-    const phrase = r.trapped <= 2
+    const phrase = r.mature
+      ? '"Y pienso vivir cada uno."'
+      : r.trapped <= 2
       ? '"Y sé exactamente qué hacer con ellos."'
       : (r.trapped <= 5 ? '"Y la arena sigue cayendo."' : '"Y apenas acabo de darme cuenta."');
     document.getElementById('sharePhrase').innerText = phrase;
